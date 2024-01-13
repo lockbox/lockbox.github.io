@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>stumbl.ing</title><link>https://stumbl.ing/</link><description>Recent content on stumbl.ing</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>© lockbox</copyright><lastBuildDate>Thu, 28 Dec 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://stumbl.ing/index.xml" rel="self" type="application/rss+xml"/><item><title>Yubikey-GPG on linux</title><link>https://stumbl.ing/wiki/yubikey-gpg-linux/</link><pubDate>Thu, 28 Dec 2023 00:00:00 +0000</pubDate><guid>https://stumbl.ing/wiki/yubikey-gpg-linux/</guid><description>Table of Contents Yubikey-SSH Important Links TLDR; man 1 gpg
+What started as two independent efforts trying to get yubikey-ssh and gpg-signed-git commits turned into 1 combined effort.
+Yubikey-SSH Requirements:
+openssh build with support for security keys On Gentoo: Lang: shell Copy USE=security-key emerge -aq net-misc/openssh Then you unlock the ability to create new ssh-keys with the *-sk suffix. You also probably want to add the options to make the key resident on the key and to require authorization every time a la:</description><content>&lt;div class="ox-hugo-toc toc">
+&lt;div class="heading">Table of Contents&lt;/div>
+&lt;ul>
+&lt;li>&lt;a href="#yubikey-ssh">Yubikey-SSH&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#important-links">Important Links&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/div>
+&lt;!--endtoc-->
+&lt;p>TLDR; &lt;code>man 1 gpg&lt;/code>&lt;/p>
+&lt;p>What started as two independent efforts trying to get yubikey-ssh and gpg-signed-git commits
+turned into 1 combined effort.&lt;/p>
+&lt;h2 id="yubikey-ssh">
+Yubikey-SSH
+&lt;a href="#yubikey-ssh" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h2>
+&lt;p>Requirements:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>openssh&lt;/code> build with support for security keys
+On Gentoo:
+&lt;div class="highlight-wrapper">
+&lt;div class="highlight-toolbar">
+&lt;span class="item">
+&lt;span class="label">Lang:&lt;/span>
+&lt;span class="name">shell&lt;/span>
+&lt;/span>
+&lt;button class="item right outline brighter hide js-btn-copy-code">Copy&lt;/button>
+&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> &lt;span class="nv">USE&lt;/span>&lt;span class="o">=&lt;/span>security-key emerge -aq net-misc/openssh&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/div>
+&lt;/li>
+&lt;/ul>
+&lt;p>Then you unlock the ability to create new ssh-keys with the &lt;code>*-sk&lt;/code> suffix.
+You also probably want to add the options to make the key resident on the key
+and to require authorization every time a la:&lt;/p>
+&lt;div class="highlight-wrapper">
+&lt;div class="highlight-toolbar">
+&lt;span class="item">
+&lt;span class="label">Lang:&lt;/span>
+&lt;span class="name">shell&lt;/span>
+&lt;/span>
+&lt;button class="item right outline brighter hide js-btn-copy-code">Copy&lt;/button>
+&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> ssh-keygen -t ecdsa-sk -O resident -O &lt;span class="nv">application&lt;/span>&lt;span class="o">=&lt;/span>ssh:text -O verify-required&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/div>
+&lt;p>Note that the &amp;ldquo;text&amp;rdquo; portion can be anything&lt;/p>
+&lt;h2 id="important-links">
+Important Links
+&lt;a href="#important-links" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h2>
+&lt;p>Start with the gentoo setup instructions, as they&amp;rsquo;re consistently decent.&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://wiki.gentoo.org/wiki/YubiKey">Yubikey on Gentoo&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://wiki.gentoo.org/wiki/YubiKey/GPG">Yubikey/GPG&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://wiki.gentoo.org/wiki/YubiKey/SSH">Yubikey/GPG + SSH&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://wiki.gentoo.org/wiki/Project:Infrastructure/Generating_GLEP_63_based_OpenPGP_keys#How_to_generate_the_GLEP_63-compliant_OpenPGP_key">Gentoo Dev GPG guide&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://wiki.gentoo.org/wiki/GnuPG">Gentoo GnuPG&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>Then follow them up with the actual &lt;a href="https://developers.yubico.com/SSH/Securing_SSH_with_FIDO2.html">YubiKey Docs&lt;/a>&lt;/p>
+&lt;p>Adding gpg to git commits:&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work">https://git-scm.com/book/en/v2/Git-Tools-Signing-Your-Work&lt;/a>&lt;/li>
+&lt;/ul></content></item><item><title>Rust Resources</title><link>https://stumbl.ing/wiki/rust-resources/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://stumbl.ing/wiki/rust-resources/</guid><description>Table of Contents Tools for CI Cute Rust Patterns Blog Posts Libraries to look at again Practices to help you be more confident in your complex code Some good to high quality rust resources Research papers using Rust Tools for CI cargo-update cargo-deny cargo-license cargo-nextest cargo-llvm-cov git cliff kani checker miri bolero cargo-valgrind cargo-tarpaulin loom cargo-shuttle Cute Rust Patterns Russian Dolls and clean Rust code Elegant Library API&amp;rsquo;s in Rust Using traits as labels Hexagonal Architecture in Rust Single Abstract Method Traits Can Rust prevent Deadlocks Understanding tracing&amp;rsquo;s macros by buliding them from scratch Nine rules for writing python extensions in rust Nine rules for creating fast, safe, compatible data structures in rust (series) a lot of the articles from this guy are meh, but starting out this one actually helped me Protocol patterns Communication over raw I/O streams async State Machine Patterns Pretty State Machine Patterns in Rust Phase Locked State Machines Zero-Cost Abstractions Programming a microntroller at four levels of abstractions Rust embedded book ZCA Rust embedded book Static Guarantees Bringing Runtime checks to Compile time Blog Posts Cheap tricks for high-performance Rust Ampersand driven development Intro to Declarative Macros Ergonomic Extractors Exercises to accompany the Book Baby&amp;rsquo;s first rust quadtree Rust to Webassembly the hard way Plugins for Rust: WASM Public github python package in rust Zig vs.</description><content>&lt;div class="ox-hugo-toc toc">
+&lt;div class="heading">Table of Contents&lt;/div>
+&lt;ul>
+&lt;li>&lt;a href="#tools-for-ci">Tools for CI&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#cute-rust-patterns">Cute Rust Patterns&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#blog-posts">Blog Posts&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#libraries-to-look-at-again">Libraries to look at again&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#practices-to-help-you-be-more-confident-in-your-complex-code">Practices to help you be more confident in your complex code&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#some-good-to-high-quality-rust-resources">Some good to high quality rust resources&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#research-papers-using-rust">Research papers using Rust&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/div>
+&lt;!--endtoc-->
+&lt;h2 id="tools-for-ci">
+Tools for CI
+&lt;a href="#tools-for-ci" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://crates.io/crates/cargo-update">cargo-update&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/EmbarkStudios/cargo-deny">cargo-deny&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/livioribeiro/cargo-readme">cargo-license&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/nextest-rs/nextest">cargo-nextest&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/taiki-e/cargo-llvm-cov">cargo-llvm-cov&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/orhun/git-cliff">git cliff&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/model-checking/kani">kani checker&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/rust-lang/miri">miri&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/camshaft/bolero">bolero&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/jfrimmel/cargo-valgrind">cargo-valgrind&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/xd009642/tarpaulin">cargo-tarpaulin&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/tokio-rs/loom">loom&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://crates.io/crates/cargo-shuttle">cargo-shuttle&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="cute-rust-patterns">
+Cute Rust Patterns
+&lt;a href="#cute-rust-patterns" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://web.archive.org/web/20220126183049/https://blog.mgattozzi.dev/russian-dolls/">Russian Dolls and clean Rust code&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://deterministic.space/elegant-apis-in-rust.html">Elegant Library API&amp;rsquo;s in Rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://deterministic.space/bevy-labels.html">Using traits as labels&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://alexis-lozano.com/hexagonal-architecture-in-rust-1/">Hexagonal Architecture in Rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://mcyoung.xyz/2023/05/11/sam-closures/#:~:text=What's%20a%20SAM%20trait%20in,%2C%20%26Self%20%2C%20or%20%26mut%20Self%20">Single Abstract Method Traits&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://medium.com/@adetaylor/can-the-rust-type-system-prevent-deadlocks-9ae6e4123037#:~:text=Nevertheless%2C%20it's%20interesting%20to%20me,as%20a%20Substructural%20Type%20System">Can Rust prevent Deadlocks&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dietcode.io/p/tracing-macros/">Understanding tracing&amp;rsquo;s macros by buliding them from scratch&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://towardsdatascience.com/nine-rules-for-writing-python-extensions-in-rust-d35ea3a4ec29">Nine rules for writing python extensions in rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://towardsdatascience.com/nine-rules-for-creating-fast-safe-and-compatible-data-structures-in-rust-part-1-c0973092e0a3">Nine rules for creating fast, safe, compatible data structures in rust (series)&lt;/a>
+&lt;ul>
+&lt;li>a lot of the articles from this guy are meh, but starting out this one actually helped me&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h4 id="protocol-patterns">
+Protocol patterns
+&lt;a href="#protocol-patterns" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h4>
+&lt;ul>
+&lt;li>&lt;a href="https://xaeroxe.github.io/async-io/">Communication over raw I/O streams async&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h4 id="state-machine-patterns">
+State Machine Patterns
+&lt;a href="#state-machine-patterns" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h4>
+&lt;ul>
+&lt;li>&lt;a href="https://hoverbear.org/blog/rust-state-machine-pattern/">Pretty State Machine Patterns in Rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://onevariable.com/blog/phase-locked-state-machines/">Phase Locked State Machines&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h4 id="zero-cost-abstractions">
+Zero-Cost Abstractions
+&lt;a href="#zero-cost-abstractions" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h4>
+&lt;ul>
+&lt;li>&lt;a href="https://pramode.in/2018/02/20/programming-a-microcontroller-in-rust-at-four-levels-of-abstraction/">Programming a microntroller at four levels of abstractions&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://doc.rust-lang.org/beta/embedded-book/static-guarantees/zero-cost-abstractions.html">Rust embedded book ZCA&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://doc.rust-lang.org/beta/embedded-book/static-guarantees/index.html">Rust embedded book Static Guarantees&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://ktkaufman03.github.io/blog/2023/04/20/rust-compile-time-checks/">Bringing Runtime checks to Compile time&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="blog-posts">
+Blog Posts
+&lt;a href="#blog-posts" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://deterministic.space/high-performance-rust.html">Cheap tricks for high-performance Rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://fiberplane.com/blog/getting-past-ampersand-driven-development-in-rust">Ampersand driven development&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://medium.com/@altaaar/a-guide-to-declarative-macros-in-rust-6f006fdaeebf">Intro to Declarative Macros&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.youtube.com/watch?v=7DOYtnCXucw">Ergonomic Extractors&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.hyperexponential.com/blog/rust-language-exercises-at-hx">Exercises to accompany the Book&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dev.to/kurt2001/a-nibble-of-quadtrees-in-rust-4o7g">Baby&amp;rsquo;s first rust quadtree&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://surma.dev/things/rust-to-webassembly/">Rust to Webassembly the hard way&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://reorchestrate.com/posts/plugins-for-rust/">Plugins for Rust: WASM&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://antoniosbarotsis.github.io/posts/python_package_written_in_rust/">Public github python package in rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://zackoverflow.dev/writing/unsafe-rust-vs-zig/">Zig vs. Rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://blog.mbrt.dev/posts/ripgrep/">Walkthrough of the ripgrep project&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://mcyoung.xyz/2023/03/29/rseq-checkout/">rseq in Rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://developerlife.com/2022/02/24/rust-non-binary-tree/">build a non-binary tree that is thread safe using rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://developerlife.com/2023/02/20/guide-to-nom-parsing/">Guide to nom parsing&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://broch.tech/posts/rust-tracing-opentelemetry/">Flexible tracing with rust and OpenTelemetry OTLP&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://medium.com/@carlmkadie/check-ai-generated-code-perfectly-and-automatically-d5b61acff741">Using kani to verify code&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://www.abubalay.com/blog/2020/08/22/safe-bindings-in-rust">The problem with safe FFI bindings in Rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://blog.logrocket.com/unsafe-rust-how-and-when-not-to-use-it/">Unsafe Rust: How and when (not) to use it&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://anssi-fr.github.io/rust-guide/01_introduction.html">French NSA secure Rust guidelines&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://medium.com/@benmcdonald_11671/6-useful-rust-macros-that-you-might-not-have-seen-before-59d1386f7bc5">6 useful rust macros&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="libraries-to-look-at-again">
+Libraries to look at again
+&lt;a href="#libraries-to-look-at-again" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://crates.io/crates/parsel">parsel&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://crates.io/crates/nom">nom&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/rerun-io/rerun">rerun&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/facebookexperimental/MIRAI">mirai&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/plotters-rs/plotters">plotters&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/finos/perspective">perspective&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/rhaiscript/rhai">rhai&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/nyx-space/nyx">nyx-space&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/autometrics-dev/autometrics-rs">autometrics&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/hecatia-elegua/bilge">bilge&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/metrics-rs/metrics">metrics&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/nvzqz/static-assertions">static_assertions&lt;/a>
+&lt;ul>
+&lt;li>will be more useful as &lt;code>const&lt;/code> rust gets more powerful&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="https://github.com/petgraph/petgraph">petgraph&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/indradb/indradb">indradb&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="practices-to-help-you-be-more-confident-in-your-complex-code">
+Practices to help you be more confident in your complex code
+&lt;a href="#practices-to-help-you-be-more-confident-in-your-complex-code" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h2>
+&lt;ul>
+&lt;li>miri + kani for unsafe things&lt;/li>
+&lt;li>use `cargo nextest` instead of `cargo test`&lt;/li>
+&lt;li>use console for helping debug async&lt;/li>
+&lt;li>&lt;a href="https://hoverbear.org/blog/a-flake-for-your-crate/">A flake for your crate&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://rrmprogramming.com/article/code-coverage-in-rust/">Code Coverage Examples in Rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://dzfrias.dev/blog/deploy-rust-cross-platform-github-actions">Github Actions to deploy cross-platform rust binaries&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="some-good-to-high-quality-rust-resources">
+Some good to high quality rust resources
+&lt;a href="#some-good-to-high-quality-rust-resources" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://marabos.nl/atomics/">Rust Atomics and Locks&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://highassurance.rs/chp3/_index.html">High Assurance Rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://nostarch.com/rust-rustaceans">Rust for Rustaceans&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://github.com/dtolnay/proc-macro-workshop">proc-macro-workshop&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://rust-unofficial.github.io/patterns/">Rust Design Patterns&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h2 id="research-papers-using-rust">
+Research papers using Rust
+&lt;a href="#research-papers-using-rust" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://arxiv.org/abs/2306.15076">Agile Development of Linux Schedulers with Ekiben&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://arxiv.org/abs/2306.08127">Friend or Foe Inside? Exploring In-Process Isolation to Maintain Memory Safety for Unsafe Rust&lt;/a>&lt;/li>
+&lt;/ul></content></item></channel></rss>
