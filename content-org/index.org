@@ -1,0 +1,8 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: ./
+#+EXPORT_FILE_NAME: _index
+#+HUGO_AUTO_SET_LASTMOD: nil
+#+HUGO_CUSTOM_FRONT_MATTER: :toc false
+#+TITLE: stumbl.ing
+
+lockbox's blog and wiki site. hopefully the longer this goes on the more i'll remember and stop spending so much time looking things up.

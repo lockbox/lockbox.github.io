@@ -1,0 +1,22 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: about
+#+EXPORT_FILE_NAME: _index
+#+TITLE: About
+#+author: lockbox
+#+HUGO_CUSTOM_FRONT_MATTER: :toc false
+# Note that this file uses 1 post per file format instead of the usual 1 post per subtree
+
+#+begin_description
+About lockbox
+#+end_description
+
+Interested in systems programming, and quadcopters.
+
+* Programming
+
+For work i primarily program in =rust= and =c=, and for hobbiy stuff im currently messing around a lot with =zig= and =dafny=.
+
+* Quadcopter
+
+My main quad is based on [Joshua Bardwell DIY V2](https://www.getfpv.com/freestyle-beginner-diy-drone-kit-joshua-bardwell-edition-v2-hd.html) with some
+different motors, props, and custom firmware for the flight controller based on [betaflight](https://github.com/betaflight/betaflight).

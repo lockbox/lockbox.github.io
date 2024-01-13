@@ -1,0 +1,55 @@
+#+HUGO_BASE_DIR: ../
+#+HUGO_SECTION: posts
+#+OPTIONS: toc:2
+#+author: lockbox
+
+
+* Posts
+:PROPERTIES:
+:EXPORT_FILE_NAME: _index
+:END:
+
+#+begin_description
+ Neat little tricks and things I've learned (or had to relearn) about computers
+#+end_description
+
+
+*  Reasoning with Dafny :@dafny:
+:PROPERTIES:
+:EXPORT_FILE_NAME: elementary-reasoning-dafny
+:END:
+
+
+* TODO Programming Resources :resources:
+Articles, blog posts, and information that might be useful at some point
+** Programming rants and blogs (generic)
+:PROPERTIES:
+:EXPORT_FILE_NAME: generic-programming-rants-and-blogs
+:END:
+- [C is Not a Low-Level Language](https://queue.acm.org/detail.cfm?id=3212479)
+- [Compile-time Detection of Atomic Context Violations for Kernel Rust Code](https://www.memorysafety.org/blog/gary-guo-klint-rust-tools/)
+- [What every C programmer should know about UB](http://blog.llvm.org/2011/05/what-every-c-programmer-should-know.html)
+- [The Importance of Logging](https://www.thecodedmessage.com/logging/)
+- [Patterns and Abstractions](https://without.boats/blog/patterns-and-abstractions/)
+- [Zig Project Managment](https://blog.orhun.dev/zig-bits-03/)
+- [Intro to rseq](https://google.github.io/tcmalloc/rseq.html)
+- [Battleye shellcode RE](https://secret.club/2020/03/31/battleye-developer-tracking.html)
+- [Match de-obfuscation and equality saturation](https://secret.club/2022/08/08/eqsat-oracle-synthesis.html)
+- [Linker Scripts](https://mcyoung.xyz/2021/06/01/linker-script/)
+- [The axioms of Linking](https://rosshemsley.co.uk/posts/linking/)
+- [What I've learned about formal methods in half a year](https://jakob.space/blog/what-ive-learned-about-formal-methods.html)
+- [TI Calculator Hobbyists](https://www.thirtythreeforty.net/posts/2021/10/ti-calculator-innovation/)
+- [System emulation detection](https://secret.club/2020/04/13/how-anti-cheats-detect-system-emulation.html)
+- [python refurb](https://github.com/dosisod/refurb)
+- [making an executable mutation engine](https://blog.back.engineering/13/04/2022/)
+** Pieces of Eight
+:PROPERTIES:
+:EXPORT_FILE_NAME: gold-pieces
+:END:
+ Random pieces and tidbits that are gold in the split second when you need the refresher
+
+*** emacs
+- multiline cursor or "[column text rectangles](http://xahlee.info/emacs/emacs/emacs_string-rectangle_ascii-art.html)"
+- emacs tramp to docker dev container [here](https://happihacking.com/blog/posts/2023/dev-containers-emacs/)
+
+
