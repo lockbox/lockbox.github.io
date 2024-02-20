@@ -1,11 +1,200 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Wiki on stumbl.ing</title><link>https://stumbl.ing/wiki/</link><description>Recent content in Wiki on stumbl.ing</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>© lockbox</copyright><lastBuildDate>Thu, 28 Dec 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://stumbl.ing/wiki/index.xml" rel="self" type="application/rss+xml"/><item><title>Yubikey-GPG on linux</title><link>https://stumbl.ing/wiki/yubikey-gpg-linux/</link><pubDate>Thu, 28 Dec 2023 00:00:00 +0000</pubDate><guid>https://stumbl.ing/wiki/yubikey-gpg-linux/</guid><description>Table of Contents Yubikey-SSH Important Links TLDR; man 1 gpg
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Wiki on stumbl.ing</title><link>https://stumbl.ing/wiki/</link><description>Recent content in Wiki on stumbl.ing</description><generator>Hugo -- gohugo.io</generator><language>en</language><copyright>© lockbox</copyright><lastBuildDate>Sun, 18 Feb 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://stumbl.ing/wiki/index.xml" rel="self" type="application/rss+xml"/><item><title>Simplified Boot Flow for the Cyclone V</title><link>https://stumbl.ing/wiki/cyclone-v-boot/</link><pubDate>Sun, 18 Feb 2024 00:00:00 +0000</pubDate><guid>https://stumbl.ing/wiki/cyclone-v-boot/</guid><description>Table of Contents Executing User Software PreLoader Image Requirements PreLoader Actions PreLoader Memory State Bootloader execution (u-boot) Operating System Boot The Cyclone V Technical Reference Manual details the boot flow for the common &amp;ldquo;running linux to boot your FPGA&amp;rdquo; usecase like so:
+Figure 1: Technical Reference Manual Diagram of Typical Boot Flow But because everything after the BootROM is classified as &amp;ldquo;user software,&amp;rdquo; there is not much described in the manual.</description><content>&lt;div class="ox-hugo-toc toc">
+&lt;div class="heading">Table of Contents&lt;/div>
+&lt;ul>
+&lt;li>&lt;a href="https://stumbl.ing/#executing-user-software">Executing User Software&lt;/a>
+&lt;ul>
+&lt;li>&lt;a href="https://stumbl.ing/#preloader-image-requirements">PreLoader Image Requirements&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#preloader-actions">PreLoader Actions&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#preloader-memory-state">PreLoader Memory State&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#bootloader-execution--u-boot">Bootloader execution (u-boot)&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#operating-system-boot">Operating System Boot&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/div>
+&lt;!--endtoc-->
+&lt;p>The &lt;a href="https://www.intel.com/content/www/us/en/docs/programmable/683126/21-2/hard-processor-system-technical-reference.html">Cyclone V Technical Reference Manual&lt;/a>
+details the boot flow for the common &amp;ldquo;running linux to boot your FPGA&amp;rdquo; usecase like so:&lt;/p>
+&lt;p>&lt;a id="figure--fig: cyclone-v-boot-flow">&lt;/a>&lt;/p>
+&lt;figure class="left">
+&lt;img src="https://stumbl.ing/ox-hugo/manual-boot-flow.png" />
+&lt;figcaption class="center" >
+&lt;span class="figure-number">Figure 1: &lt;/span>Technical Reference Manual Diagram of Typical Boot Flow
+&lt;/figcaption>
+&lt;/figure>
+&lt;p>But because everything after the BootROM is classified as &amp;ldquo;user software,&amp;rdquo; there is not much described in the manual.&lt;/p>
+&lt;p>What the manual describes as &amp;ldquo;user software&amp;rdquo; still encompasses an entire software stack built,
+maintained, and packaged by Altera, but &lt;strong>can&lt;/strong> be overriden by the user. As far as behavior and
+code that users cannot overwrite go, we are limited to the BootROM.&lt;/p>
+&lt;p>The BootROM is described in short on page &lt;code>A-5&lt;/code>, and the state machine is fully diagrammed on
+page &lt;code>A-27&lt;/code>.&lt;/p>
+&lt;ul>
+&lt;li>BootROM is 64kb in size&lt;/li>
+&lt;li>Located in on-chip ROM at address range &lt;code>0xFFFD_0000&lt;/code> to &lt;code>0xFFFD_FFFF&lt;/code>&lt;/li>
+&lt;li>The purpose is to determine the boot source, initialize the HPS after reset, and jump to the PreLoader&lt;/li>
+&lt;/ul>
+&lt;p>There is a little more nuance if the PreLoader needs to be loaded from flash into RAM. RTFM for more.&lt;/p>
+&lt;h2 id="executing-user-software">
+Executing User Software
+&lt;a href="#executing-user-software" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h2>
+&lt;p>The BootROM&amp;rsquo;s entire purpose is to call the PreLoader, and setup the initial environment necessary for
+the PreLoader to be able to load the BootLoader (u-boot) which in turn loads the Operating System (Linux).&lt;/p>
+&lt;p>Page &lt;code>A-31&lt;/code> details the entry state of the processor on calling the PreLoader:&lt;/p>
+&lt;ul>
+&lt;li>I-cache disabled&lt;/li>
+&lt;li>Branch Predictor enabled&lt;/li>
+&lt;li>D cache disabled&lt;/li>
+&lt;li>MMU disabled&lt;/li>
+&lt;li>FPU enabled&lt;/li>
+&lt;li>NEON enabled&lt;/li>
+&lt;li>Processor is in ARM &lt;code>supervisor&lt;/code> mode&lt;/li>
+&lt;/ul>
+&lt;p>Register state:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>r0&lt;/code>: pointer to shared memory block used to pass information to PreLoader (located in top 4kb of on-chip RAM)&lt;/li>
+&lt;li>&lt;code>r1&lt;/code>: length of the shared memory&lt;/li>
+&lt;li>&lt;code>r2&lt;/code>: set to &lt;code>0x0&lt;/code>&lt;/li>
+&lt;li>&lt;code>r3&lt;/code>: reserved&lt;/li>
+&lt;/ul>
+&lt;p>Other system state:&lt;/p>
+&lt;ul>
+&lt;li>BootROM is mapped to address &lt;code>0x0&lt;/code>&lt;/li>
+&lt;li>&lt;code>L4&lt;/code> watchdog timer active and toggled&lt;/li>
+&lt;li>Reset cause saved to &lt;code>stat&lt;/code> register of the Reset Manager&lt;/li>
+&lt;li>Shared memory is setup as described in table &lt;code>A-18&lt;/code>&lt;/li>
+&lt;/ul>
+&lt;p>Before the PreLoader can actually be executed, the BootROM validates the PreLoader image after mapping
+it into memory at address &lt;code>0xFFFF_0000&lt;/code> -&amp;gt; &lt;code>0xFFFF_F000&lt;/code>.&lt;/p>
+&lt;h3 id="preloader-image-requirements">
+PreLoader Image Requirements
+&lt;a href="#preloader-image-requirements" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h3>
+&lt;ul>
+&lt;li>Validation word matches magic &lt;code>0x3130_5341&lt;/code> (&amp;ldquo;10SA&amp;rdquo;)&lt;/li>
+&lt;li>Header version matches&lt;/li>
+&lt;li>Header program length (in 32-bit words) from offset 0 to the end of the code area
+&lt;ul>
+&lt;li>Not including exception vectors or CRC&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Checksum of all bytes in the header from offset &lt;code>0x40&lt;/code> to &lt;code>0x49&lt;/code>&lt;/li>
+&lt;li>Maximum size of 60 kb (on-chip RAM - 4kb reserved RAM)&lt;/li>
+&lt;/ul>
+&lt;figure class="left">
+&lt;img src="https://stumbl.ing/ox-hugo/preloader-image-layout.png" />
+&lt;figcaption class="center" >
+&lt;span class="figure-number">Figure 2: &lt;/span>PreLoader Image Layout
+&lt;/figcaption>
+&lt;/figure>
+&lt;h3 id="preloader-actions">
+PreLoader Actions
+&lt;a href="#preloader-actions" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h3>
+&lt;p>The manual very helpfully describes the PreLoader functions as &amp;ldquo;user-defined, however typical functions include &amp;hellip;&amp;rdquo;
+But also describes a detailed state machine + order of operations on page &lt;code>A-29&lt;/code>.&lt;/p>
+&lt;p>TLDR;&lt;/p>
+&lt;ul>
+&lt;li>Freeze all I/O banks&lt;/li>
+&lt;li>Reset peripherals&lt;/li>
+&lt;li>Setup clocks&lt;/li>
+&lt;li>Unfreeze all I/O banks&lt;/li>
+&lt;li>L3/L4 configuration&lt;/li>
+&lt;li>Timer + UART initialization&lt;/li>
+&lt;li>SDRAM initialization&lt;/li>
+&lt;li>Boot next stage&lt;/li>
+&lt;/ul>
+&lt;h3 id="preloader-memory-state">
+PreLoader Memory State
+&lt;a href="#preloader-memory-state" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h3>
+&lt;p>Probably the most helpful thing in the manual so far is this image that shows the state of the memory regions.
+In the paragraph before this in the manual, it discusses that until the &lt;code>L3&lt;/code> interconnect remap bit 0 is
+set high, the exception vectors are still pointing to the exceptions handlers provided by the BootROM.
+Setting this bit high remaps the on-chip RAM that the PreLoader is executing with into the 0 page to
+successfully splat onto the BootROM handlers.&lt;/p>
+&lt;figure class="left">
+&lt;img src="https://stumbl.ing/ox-hugo/preloader-remapping-memory.png" />
+&lt;figcaption class="center" >
+&lt;span class="figure-number">Figure 3: &lt;/span>Memory state of the Cyclone V HPS before and after executing a (compliant) PreLoader
+&lt;/figcaption>
+&lt;/figure>
+&lt;p>Comparing this to the &lt;a href="https://developer.arm.com/documentation/den0013/d/Boot-Code/Booting-a-bare-metal-system">ARM Cortex-A booting a bare-metal system guide&lt;/a>, we can
+start to see some similarities and start to line things up at least as far as code-layout goes.&lt;/p>
+&lt;p>The PreLoader (after settting up the respective peripherals), then calls the BootLoader.&lt;/p>
+&lt;h3 id="bootloader-execution--u-boot">
+Bootloader execution (u-boot)
+&lt;a href="#bootloader-execution--u-boot" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h3>
+&lt;p>u-boot is going to do a few main things:&lt;/p>
+&lt;ul>
+&lt;li>Get loaded at &lt;code>0xFFFF_0000&lt;/code>&lt;/li>
+&lt;li>Load u-boot scripts that are present&lt;/li>
+&lt;li>Find the device tree it is supposed to use&lt;/li>
+&lt;li>Execute the kernel with the device tree passed as a parameter&lt;/li>
+&lt;/ul>
+&lt;p>In the default &lt;a href="https://github.com/altera-opensource/u-boot-socfpga/blob/14e5dc0d59381b43979ab059f1de9cf9afe3645a/configs/socfpga_cyclone5_defconfig">provided-from-altera-open-source u-boot configuration&lt;/a>,
+there are a few things to note in the `KConfig` for the target:&lt;/p>
+&lt;ul>
+&lt;li>booting with SPL u-boot (full blown u-boot), with &lt;code>0xFFFF_0000&lt;/code> start address&lt;/li>
+&lt;li>default malloc len is size &lt;code>0x4000_0000&lt;/code> (1GB)&lt;/li>
+&lt;li>u-boot expects to be at specific offsets into the SPI flash device memory&lt;/li>
+&lt;/ul>
+&lt;p>Looking at the &lt;a href="https://github.com/altera-opensource/u-boot-socfpga/blob/14e5dc0d59381b43979ab059f1de9cf9afe3645a/arch/arm/dts/socfpga_cyclone5_socdk.dts">default device-tree&lt;/a> (also provided by Altera),
+we can get the list of all the device drivers we need to bake into our linux kernel image (via the &amp;ldquo;compatible&amp;rdquo; attribute in each section),
+the size of memory via the &lt;code>memory&lt;/code> section, and the default peripherals setups of everything else. Note that you can also describe SRAM
+by using the &lt;code>sram&lt;/code> section (&lt;code>mmio-sram&lt;/code> is the correct driver aiui), and the &lt;code>sdram&lt;/code> / &lt;code>mmc&lt;/code> blocks as well.&lt;/p>
+&lt;p>From there, any &lt;code>u-boot&lt;/code> scripts or environment will dictate how linux (and your fpga :p) is actually going to get loaded and executed.
+Nowadays you&amp;rsquo;ll probably run into a `bootz` (&lt;a href="https://docs.u-boot.org/en/latest/usage/cmd/bootz.html">docs&lt;/a>).&lt;/p>
+&lt;h3 id="operating-system-boot">
+Operating System Boot
+&lt;a href="#operating-system-boot" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h3>
+&lt;p>If you get the default zlinux, then it will self unpack into memory, and then execute the `init` command as specified in your
+kernel command line environment.&lt;/p>
+&lt;p>And it&amp;rsquo;s done and booted! :D&lt;/p></content></item><item><title>Updating Nix daemon settings</title><link>https://stumbl.ing/wiki/nix-settings-update/</link><pubDate>Sat, 10 Feb 2024 00:00:00 +0000</pubDate><guid>https://stumbl.ing/wiki/nix-settings-update/</guid><description>Table of Contents Related github issue TLDR;
+Lang: shell Copy sudo kill-all nix-daemon or
+Lang: shell Copy nix -k &amp;lt;command you were going to run&amp;gt; Why do you need to restart the daemon when a config file is changed as opposed to just telling it to reload? Not sure but this works for now.
+Related github issue NixOS autoreload config file on change</description><content>&lt;div class="ox-hugo-toc toc">
+&lt;div class="heading">Table of Contents&lt;/div>
+&lt;ul>
+&lt;li>&lt;a href="https://stumbl.ing/#related-github-issue">Related github issue&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/div>
+&lt;!--endtoc-->
+&lt;p>TLDR;&lt;/p>
+&lt;div class="highlight-wrapper">
+&lt;div class="highlight-toolbar">
+&lt;span class="item">
+&lt;span class="label">Lang:&lt;/span>
+&lt;span class="name">shell&lt;/span>
+&lt;/span>
+&lt;button class="item right outline brighter hide js-btn-copy-code">Copy&lt;/button>
+&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> sudo kill-all nix-daemon&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/div>
+&lt;p>or&lt;/p>
+&lt;div class="highlight-wrapper">
+&lt;div class="highlight-toolbar">
+&lt;span class="item">
+&lt;span class="label">Lang:&lt;/span>
+&lt;span class="name">shell&lt;/span>
+&lt;/span>
+&lt;button class="item right outline brighter hide js-btn-copy-code">Copy&lt;/button>
+&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> nix -k &amp;lt;&lt;span class="nb">command&lt;/span> you were going to run&amp;gt;&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/div>
+&lt;p>Why do you need to restart the daemon when a config file is changed as opposed to just telling it to reload?
+Not sure but this works for now.&lt;/p>
+&lt;h2 id="related-github-issue">
+Related github issue
+&lt;a href="#related-github-issue" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h2>
+&lt;p>&lt;a href="https://github.com/NixOS/nix/issues/8939">NixOS autoreload config file on change&lt;/a>&lt;/p></content></item><item><title>Yubikey-GPG on linux</title><link>https://stumbl.ing/wiki/yubikey-gpg-linux/</link><pubDate>Thu, 28 Dec 2023 00:00:00 +0000</pubDate><guid>https://stumbl.ing/wiki/yubikey-gpg-linux/</guid><description>Table of Contents Yubikey-SSH Important Links TLDR; man 1 gpg
 What started as two independent efforts trying to get yubikey-ssh and gpg-signed-git commits turned into 1 combined effort.
 Yubikey-SSH Requirements:
 openssh build with support for security keys On Gentoo: Lang: shell Copy USE=security-key emerge -aq net-misc/openssh Then you unlock the ability to create new ssh-keys with the *-sk suffix. You also probably want to add the options to make the key resident on the key and to require authorization every time a la:</description><content>&lt;div class="ox-hugo-toc toc">
 &lt;div class="heading">Table of Contents&lt;/div>
 &lt;ul>
-&lt;li>&lt;a href="#yubikey-ssh">Yubikey-SSH&lt;/a>&lt;/li>
-&lt;li>&lt;a href="#important-links">Important Links&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#yubikey-ssh">Yubikey-SSH&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#important-links">Important Links&lt;/a>&lt;/li>
 &lt;/ul>
 &lt;/div>
 &lt;!--endtoc-->
@@ -61,13 +250,13 @@ Important Links
 &lt;/ul></content></item><item><title>Rust Resources</title><link>https://stumbl.ing/wiki/rust-resources/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://stumbl.ing/wiki/rust-resources/</guid><description>Table of Contents Tools for CI Cute Rust Patterns Blog Posts Libraries to look at again Practices to help you be more confident in your complex code Some good to high quality rust resources Research papers using Rust Tools for CI cargo-update cargo-deny cargo-license cargo-nextest cargo-llvm-cov git cliff kani checker miri bolero cargo-valgrind cargo-tarpaulin loom cargo-shuttle Cute Rust Patterns Russian Dolls and clean Rust code Elegant Library API&amp;rsquo;s in Rust Using traits as labels Hexagonal Architecture in Rust Single Abstract Method Traits Can Rust prevent Deadlocks Understanding tracing&amp;rsquo;s macros by buliding them from scratch Nine rules for writing python extensions in rust Nine rules for creating fast, safe, compatible data structures in rust (series) a lot of the articles from this guy are meh, but starting out this one actually helped me Protocol patterns Communication over raw I/O streams async State Machine Patterns Pretty State Machine Patterns in Rust Phase Locked State Machines Zero-Cost Abstractions Programming a microntroller at four levels of abstractions Rust embedded book ZCA Rust embedded book Static Guarantees Bringing Runtime checks to Compile time Blog Posts Cheap tricks for high-performance Rust Ampersand driven development Intro to Declarative Macros Ergonomic Extractors Exercises to accompany the Book Baby&amp;rsquo;s first rust quadtree Rust to Webassembly the hard way Plugins for Rust: WASM Public github python package in rust Zig vs.</description><content>&lt;div class="ox-hugo-toc toc">
 &lt;div class="heading">Table of Contents&lt;/div>
 &lt;ul>
-&lt;li>&lt;a href="#tools-for-ci">Tools for CI&lt;/a>&lt;/li>
-&lt;li>&lt;a href="#cute-rust-patterns">Cute Rust Patterns&lt;/a>&lt;/li>
-&lt;li>&lt;a href="#blog-posts">Blog Posts&lt;/a>&lt;/li>
-&lt;li>&lt;a href="#libraries-to-look-at-again">Libraries to look at again&lt;/a>&lt;/li>
-&lt;li>&lt;a href="#practices-to-help-you-be-more-confident-in-your-complex-code">Practices to help you be more confident in your complex code&lt;/a>&lt;/li>
-&lt;li>&lt;a href="#some-good-to-high-quality-rust-resources">Some good to high quality rust resources&lt;/a>&lt;/li>
-&lt;li>&lt;a href="#research-papers-using-rust">Research papers using Rust&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#tools-for-ci">Tools for CI&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#cute-rust-patterns">Cute Rust Patterns&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#blog-posts">Blog Posts&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#libraries-to-look-at-again">Libraries to look at again&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#practices-to-help-you-be-more-confident-in-your-complex-code">Practices to help you be more confident in your complex code&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#some-good-to-high-quality-rust-resources">Some good to high quality rust resources&lt;/a>&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#research-papers-using-rust">Research papers using Rust&lt;/a>&lt;/li>
 &lt;/ul>
 &lt;/div>
 &lt;!--endtoc-->
