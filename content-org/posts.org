@@ -111,3 +111,23 @@ Hopefully I'll have enough free time to check these new pieces of the Playdate o
 - making some bindings to available userspace code outside of the SDK
 - moving all my tooling to ghidra (I am not a fan of the Binary Ninja file loaders and its annoying to dev on, with little room for real testing of loader plugin code)
 - finish documenting firmware update process (realistically ill probably have to restart)
+
+* Zig :@zig:
+
+** Typesafe parametric VTables in zig
+:PROPERTIES:
+:EXPORT_FILE_NAME: parametric-zig-vtable
+:EXPORT_DATE: 2024-01-22
+:END:
+
+Zig has a new (to me) fresh approach to generics and creating generic objects + types, where instead of the `C++` template approach
+a la
+
+#+begin_src c++
+int super_cool_generics<T, X>([]T input_data, X output)
+{
+    // ...
+}
+#+end_src
+
+Zig instead has `type` as a
