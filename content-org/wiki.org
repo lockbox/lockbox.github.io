@@ -59,12 +59,13 @@ Relevant resources:
 - <https://www.reddit.com/r/yubikey/comments/kfxiue/sign_git_commit_without_entering_pin/>
 
 
-* Updating Nix daemon settings
+* nix gotchas
 :PROPERTIES:
 :EXPORT_DATE: 2024-02-10
-:EXPORT_FILE_NAME: nix-settings-update
+:EXPORT_FILE_NAME: nix-gotchas
 :END:
 
+** Updating Nix daemon settings
 TLDR;
 
 #+begin_src shell
@@ -80,8 +81,50 @@ or
 Why do you need to restart the daemon when a config file is changed as opposed to just telling it to reload?
 Not sure but this works for now.
 
-** Related github issue
+*** Related github issue
 [[github:NixOS/nix/issues/8939][NixOS autoreload config file on change]]
+** Nix only tracks things added to git
+when using flakes you *must* at least stage changes to git, otherwise you will get
+very difficult to debug errors
+
+eg. your working directory looks like
+
+#+begin_src shell
+fd
+#+end_src
+
+#+RESULTS:
+| flake.nix           |
+| flake.lock          |
+| systems/            |
+| systems/default.nix |
+
+and you make a change to ~systems/default.nix~.
+
+#+begin_src shell
+git status
+#+end_src
+
+#+RESULTS:
+| ➜  git status                                                         |
+| On branch main                                                        |
+| Your branch is up to date with 'origin/main'.                         |
+|                                                                       |
+| Changes not staged for commit:                                        |
+| (use "git add <file>..." to update what will be committed)            |
+| (use "git restore <file>..." to discard changes in working directory) |
+| modified:   systems/default.nix                                       |
+|                                                                       |
+| no changes added to commit (use "git add" and/or "git commit -a")     |
+
+Then you attempt to use or import ~systems~, as an exmaple just try to execute it inline with the repl:
+
+,#+begin_src shell
+nix repl --file systems/
+#+end_src
+
+you will actually be execcuting on the *previous* state of ~default.nix~ that git has in its object store
+until you ~git add~, or commit etc.
 
 * Simplified Boot Flow for the Cyclone V
 :PROPERTIES:
@@ -212,6 +255,19 @@ If you get the default zlinux, then it will self unpack into memory, and then ex
 kernel command line environment.
 
 And it's done and booted! :D
+
+* org-mode with Doom Emacs
+:PROPERTIES:
+:EXPORT_FILE_NAME: org-mode-with-doom-emacs
+:EXPORT_DATE: 2024-02-19
+:END:
+
+| Key Combo | Command       | Meaning                   |
+|-----------+---------------+---------------------------|
+| =C-c n n= | =org-capture= | Jump to org-capture popup |
+| =C-c n a= | =org-agenda=  | Jump to org-agenda view   |
+|           |               |                           |
+#+TBLFM: $2=org-capture
 
 * Rust Resources
 :PROPERTIES:
