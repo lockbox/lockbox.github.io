@@ -153,16 +153,24 @@ Operating System Boot
 &lt;/h3>
 &lt;p>If you get the default zlinux, then it will self unpack into memory, and then execute the `init` command as specified in your
 kernel command line environment.&lt;/p>
-&lt;p>And it&amp;rsquo;s done and booted! :D&lt;/p></content></item><item><title>Updating Nix daemon settings</title><link>https://stumbl.ing/wiki/nix-settings-update/</link><pubDate>Sat, 10 Feb 2024 00:00:00 +0000</pubDate><guid>https://stumbl.ing/wiki/nix-settings-update/</guid><description>Table of Contents Related github issue TLDR;
+&lt;p>And it&amp;rsquo;s done and booted! :D&lt;/p></content></item><item><title>nix gotchas</title><link>https://stumbl.ing/wiki/nix-gotchas/</link><pubDate>Sat, 10 Feb 2024 00:00:00 +0000</pubDate><guid>https://stumbl.ing/wiki/nix-gotchas/</guid><description>Table of Contents Updating Nix daemon settings Related github issue Nix only tracks things added to git Updating Nix daemon settings TLDR;
 Lang: shell Copy sudo kill-all nix-daemon or
-Lang: shell Copy nix -k &amp;lt;command you were going to run&amp;gt; Why do you need to restart the daemon when a config file is changed as opposed to just telling it to reload? Not sure but this works for now.
-Related github issue NixOS autoreload config file on change</description><content>&lt;div class="ox-hugo-toc toc">
+Lang: shell Copy nix -k &amp;lt;command you were going to run&amp;gt; Why do you need to restart the daemon when a config file is changed as opposed to just telling it to reload? Not sure but this works for now.</description><content>&lt;div class="ox-hugo-toc toc">
 &lt;div class="heading">Table of Contents&lt;/div>
+&lt;ul>
+&lt;li>&lt;a href="https://stumbl.ing/#updating-nix-daemon-settings">Updating Nix daemon settings&lt;/a>
 &lt;ul>
 &lt;li>&lt;a href="https://stumbl.ing/#related-github-issue">Related github issue&lt;/a>&lt;/li>
 &lt;/ul>
+&lt;/li>
+&lt;li>&lt;a href="https://stumbl.ing/#nix-only-tracks-things-added-to-git">Nix only tracks things added to git&lt;/a>&lt;/li>
+&lt;/ul>
 &lt;/div>
 &lt;!--endtoc-->
+&lt;h2 id="updating-nix-daemon-settings">
+Updating Nix daemon settings
+&lt;a href="#updating-nix-daemon-settings" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h2>
 &lt;p>TLDR;&lt;/p>
 &lt;div class="highlight-wrapper">
 &lt;div class="highlight-toolbar">
@@ -183,11 +191,41 @@ Related github issue NixOS autoreload config file on change</description><conten
 &lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl"> nix -k &amp;lt;&lt;span class="nb">command&lt;/span> you were going to run&amp;gt;&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/div>
 &lt;p>Why do you need to restart the daemon when a config file is changed as opposed to just telling it to reload?
 Not sure but this works for now.&lt;/p>
-&lt;h2 id="related-github-issue">
+&lt;h3 id="related-github-issue">
 Related github issue
 &lt;a href="#related-github-issue" class="hanchor" ariaLabel="Anchor">&lt;/a>
+&lt;/h3>
+&lt;p>&lt;a href="https://github.com/NixOS/nix/issues/8939">NixOS autoreload config file on change&lt;/a>&lt;/p>
+&lt;h2 id="nix-only-tracks-things-added-to-git">
+Nix only tracks things added to git
+&lt;a href="#nix-only-tracks-things-added-to-git" class="hanchor" ariaLabel="Anchor">&lt;/a>
 &lt;/h2>
-&lt;p>&lt;a href="https://github.com/NixOS/nix/issues/8939">NixOS autoreload config file on change&lt;/a>&lt;/p></content></item><item><title>The state of Playdate in JAN 2024</title><link>https://stumbl.ing/posts/state-of-playdate/</link><pubDate>Sun, 14 Jan 2024 00:00:00 +0000</pubDate><guid>https://stumbl.ing/posts/state-of-playdate/</guid><description>Table of Contents 2024 Playdate Looking forward The last time i messed around with the Playdate (~1 year ago &amp;ndash; pd-platform), the OS version was 1.x, and there was only 1 released version of the console. Now there are 2 different hardware revisions (the difference being the processor model), and the OS has been updated to a 2.x revision to reflect that (see this blog post).
+&lt;p>when using flakes you &lt;strong>must&lt;/strong> at least stage changes to git, otherwise you will get
+very difficult to debug errors&lt;/p>
+&lt;p>eg. your working directory looks like&lt;/p>
+&lt;div class="highlight-wrapper">
+&lt;div class="highlight-toolbar">
+&lt;span class="item">
+&lt;span class="label">Lang:&lt;/span>
+&lt;span class="name">shell&lt;/span>
+&lt;/span>
+&lt;button class="item right outline brighter hide js-btn-copy-code">Copy&lt;/button>
+&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">fd&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/div>
+&lt;p>and you make a change to &lt;code>systems/default.nix&lt;/code>.&lt;/p>
+&lt;div class="highlight-wrapper">
+&lt;div class="highlight-toolbar">
+&lt;span class="item">
+&lt;span class="label">Lang:&lt;/span>
+&lt;span class="name">shell&lt;/span>
+&lt;/span>
+&lt;button class="item right outline brighter hide js-btn-copy-code">Copy&lt;/button>
+&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-shell" data-lang="shell">&lt;span class="line">&lt;span class="cl">git status&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/div>
+&lt;p>Then you attempt to use or import &lt;code>systems&lt;/code>, as an exmaple just try to execute it inline with the repl:&lt;/p>
+&lt;p>,#+begin_src shell
+nix repl &amp;ndash;file systems/
+#+end_src&lt;/p>
+&lt;p>you will actually be execcuting on the &lt;strong>previous&lt;/strong> state of &lt;code>default.nix&lt;/code> that git has in its object store
+until you &lt;code>git add&lt;/code>, or commit etc.&lt;/p></content></item><item><title>The state of Playdate in JAN 2024</title><link>https://stumbl.ing/posts/state-of-playdate/</link><pubDate>Sun, 14 Jan 2024 00:00:00 +0000</pubDate><guid>https://stumbl.ing/posts/state-of-playdate/</guid><description>Table of Contents 2024 Playdate Looking forward The last time i messed around with the Playdate (~1 year ago &amp;ndash; pd-platform), the OS version was 1.x, and there was only 1 released version of the console. Now there are 2 different hardware revisions (the difference being the processor model), and the OS has been updated to a 2.x revision to reflect that (see this blog post).
 2024 Playdate There&amp;rsquo;s now a game catalog, where you can purchase games to automatically sideload them, along with the advent of a new container file format supporting encryption.</description><content>&lt;div class="ox-hugo-toc toc">
 &lt;div class="heading">Table of Contents&lt;/div>
 &lt;ul>
