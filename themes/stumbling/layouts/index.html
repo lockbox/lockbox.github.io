@@ -1,0 +1,42 @@
+{{ define "main" }}
+<!-- Hero Section with Logo -->
+<section class="hero">
+    <div class="container">
+        {{ if .Site.Params.logo }}
+        <div class="logo-container">
+            <img src="{{ .Site.Params.logo | relURL }}" alt="{{ .Site.Title }} logo" class="logo">
+        </div>
+        {{ end }}
+        <h1>{{ .Site.Title }}</h1>
+        <p class="tagline">// {{ .Site.Params.description }}</p>
+        <div class="hero-links">
+            <a href="/posts/" class="primary">Read Posts</a>
+            <a href="/projects/">Projects</a>
+            <a href="/about/">About Me</a>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <h2 style="margin: 2rem 0;">Recent Posts</h2>
+    
+    {{ $pages := where .Site.RegularPages "Type" "posts" }}
+    {{ range first 5 $pages }}
+    <article class="post-card">
+        <div class="post-meta">
+            <span class="post-date">{{ .Date.Format "2006-01-02" }}</span>
+            {{ range .Params.categories }}
+            <span class="post-category">{{ . }}</span>
+            {{ end }}
+        </div>
+        <h2 class="post-title">
+            <a href="{{ .Permalink }}">{{ .Title }}</a>
+        </h2>
+        <div class="post-excerpt">
+            <p>{{ .Summary | truncate 200 }}</p>
+        </div>
+        <a href="{{ .Permalink }}" class="read-more">Read more</a>
+    </article>
+    {{ end }}
+</div>
+{{ end }}

@@ -1,0 +1,12 @@
+name = "stumbling"
+license = "MIT"
+description = "A dark-mode-first theme for reverse engineers and embedded developers"
+homepage = "https://stumbl.ing/"
+tags = ["blog", "technical", "dark", "minimal", "responsive", "orange"]
+features = ["dark mode", "syntax highlighting", "responsive", "fast"]
+min_version = "0.110.0"
+
+[author]
+  name = "lockbox"
+  homepage = "https://github.com/lockbox"
+

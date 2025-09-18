@@ -1,0 +1,45 @@
+{{ define "main" }}
+<div class="container">
+    <h1>{{ .Title }}</h1>
+    
+    {{ $paginator := .Paginate .Pages 10 }}
+    {{ range $paginator.Pages }}
+    <article class="post-card">
+        <div class="post-meta">
+            <span class="post-date">{{ .Date.Format "2006-01-02" }}</span>
+            {{ range .Params.categories }}
+            <span class="post-category">{{ . }}</span>
+            {{ end }}
+        </div>
+        <h2 class="post-title">
+            <a href="{{ .Permalink }}">{{ .Title }}</a>
+        </h2>
+        <div class="post-excerpt">
+            <p>{{ .Summary | truncate 200 }}</p>
+        </div>
+        <a href="{{ .Permalink }}" class="read-more">Read more</a>
+    </article>
+    {{ end }}
+    
+    {{ if gt $paginator.TotalPages 1 }}
+    <div class="pagination">
+        {{ if $paginator.HasPrev }}
+        <a href="{{ $paginator.Prev.URL }}">← Previous</a>
+        {{ end }}
+        
+        {{ range $paginator.Pagers }}
+        {{ if eq . $paginator }}
+        <span class="current">{{ .PageNumber }}</span>
+        {{ else }}
+        <a href="{{ .URL }}">{{ .PageNumber }}</a>
+        {{ end }}
+        {{ end }}
+        
+        {{ if $paginator.HasNext }}
+        <a href="{{ $paginator.Next.URL }}">Next →</a>
+        {{ end }}
+    </div>
+    {{ end }}
+</div>
+{{ end }}
+

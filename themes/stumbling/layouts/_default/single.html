@@ -1,0 +1,32 @@
+{{ define "main" }}
+<div class="container">
+    <article>
+        <header class="post-header">
+            {{ partial "post-meta.html" . }}
+            <h1>{{ .Title }}</h1>
+        </header>
+        
+        <div class="post-content">
+            {{ .Content }}
+        </div>
+        
+        {{ if .Params.tags }}
+        <div class="tag-list">
+            {{ range .Params.tags }}
+            <a href="{{ "tags/" | relURL }}{{ . | urlize }}" class="tag">#{{ . }}</a>
+            {{ end }}
+        </div>
+        {{ end }}
+        
+        <nav class="post-nav">
+            {{ with .PrevInSection }}
+            <a href="{{ .Permalink }}" class="prev-post">← {{ .Title }}</a>
+            {{ end }}
+            {{ with .NextInSection }}
+            <a href="{{ .Permalink }}" class="next-post">{{ .Title }} →</a>
+            {{ end }}
+        </nav>
+    </article>
+</div>
+{{ end }}
+

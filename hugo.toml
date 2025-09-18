@@ -1,0 +1,57 @@
+baseURL = 'https://stumbl.ing/'
+languageCode = 'en-us'
+title = 'stumbl.ing'
+theme = 'stumbling'
+
+# Enable robots.txt and sitemap
+enableRobotsTXT = true
+enableGitInfo = false
+
+[pagination]
+pagerSize = 10
+
+[params]
+  description = "Embedded shenanigans: DSP debugging, reverse engineering, and hardware teardowns"
+  logo = "/images/logo.png"
+  favicon = "/favicon.ico"
+  
+  # Social links
+  github_username = "lockbox"
+  github_org = "struct-foo"
+  styx_repo = "styx-emulator"
+  mastodon = "@lockbox@infosec.exchange"
+  twitter = "lockbox4141"
+  
+  # Features
+  showReadingTime = true
+  defaultTheme = "dark"
+
+[menu]
+  [[menu.main]]
+    name = "About"
+    url = "/about/"
+    weight = 1
+  
+  [[menu.main]]
+    name = "Projects"  
+    url = "/projects/"
+    weight = 2
+    
+  [[menu.main]]
+    name = "Archive"
+    url = "/posts/"
+    weight = 3
+    
+  [[menu.main]]
+    name = "GitHub"
+    url = "https://github.com/lockbox"
+    weight = 4
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+
+[outputs]
+  home = ["HTML", "RSS"]
+  section = ["HTML", "RSS"]
+
