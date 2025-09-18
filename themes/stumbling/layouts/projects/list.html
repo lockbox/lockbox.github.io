@@ -1,0 +1,129 @@
+{{ define "main" }}
+<div class="container">
+    <div class="projects-header">
+        <h1>Projects</h1>
+        <p class="projects-description">
+            Tools, emulators, and research projects for reverse engineering and embedded systems analysis.
+        </p>
+    </div>
+
+    <!-- Featured Projects -->
+    {{ $featured := where .Pages "Params.featured" true }}
+    {{ if $featured }}
+    <section class="featured-projects">
+        <h2 class="section-title">
+            <span class="terminal-prompt">></span> Featured Projects
+        </h2>
+        <div class="projects-grid">
+            {{ range sort $featured "Weight" }}
+            <article class="project-card featured">
+                <div class="project-card-header">
+                    {{ if .Params.cover_image }}
+                    <img src="{{ .Params.cover_image | relURL }}" alt="{{ .Title }}" class="project-image">
+                    {{ else }}
+                    <div class="project-image-placeholder">
+                        <span>{{ substr .Title 0 2 }}</span>
+                    </div>
+                    {{ end }}
+                    <div class="project-status status-{{ .Params.status | default "active" }}">
+                        {{ .Params.status | default "active" }}
+                    </div>
+                </div>
+                <div class="project-card-body">
+                    <h3 class="project-title">
+                        <a href="{{ .Permalink }}">{{ .Title }}</a>
+                    </h3>
+                    <p class="project-description">{{ .Description }}</p>
+                    
+                    {{ if .Params.tech_stack }}
+                    <div class="tech-stack">
+                        {{ range .Params.tech_stack }}
+                        <span class="tech-tag">{{ . }}</span>
+                        {{ end }}
+                    </div>
+                    {{ end }}
+                    
+                    <div class="project-links">
+                        <a href="{{ .Permalink }}" class="project-link primary">
+                            <span>View Details</span>
+                            <span class="arrow">→</span>
+                        </a>
+                        {{ if .Params.github }}
+                        <a href="{{ .Params.github }}" target="_blank" class="project-link github">
+                            <svg class="icon" viewBox="0 0 16 16" width="16" height="16">
+                                <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                            </svg>
+                            <span>Code</span>
+                        </a>
+                        {{ end }}
+                        {{ if .Params.demo }}
+                        <a href="{{ .Params.demo }}" target="_blank" class="project-link demo">
+                            <span>Demo</span>
+                        </a>
+                        {{ end }}
+                    </div>
+                </div>
+            </article>
+            {{ end }}
+        </div>
+    </section>
+    {{ end }}
+
+    <!-- All Projects -->
+    {{ $regular := where .Pages "Params.featured" "!=" true }}
+    {{ if $regular }}
+    <section class="all-projects">
+        <h2 class="section-title">
+            <span class="terminal-prompt">></span> All Projects
+        </h2>
+        <div class="projects-grid">
+            {{ range sort $regular "Weight" }}
+            <article class="project-card">
+                <div class="project-card-header">
+                    {{ if .Params.cover_image }}
+                    <img src="{{ .Params.cover_image | relURL }}" alt="{{ .Title }}" class="project-image">
+                    {{ else }}
+                    <div class="project-image-placeholder">
+                        <span>{{ substr .Title 0 2 }}</span>
+                    </div>
+                    {{ end }}
+                    <div class="project-status status-{{ .Params.status | default "active" }}">
+                        {{ .Params.status | default "active" }}
+                    </div>
+                </div>
+                <div class="project-card-body">
+                    <h3 class="project-title">
+                        <a href="{{ .Permalink }}">{{ .Title }}</a>
+                    </h3>
+                    <p class="project-description">{{ .Description }}</p>
+                    
+                    {{ if .Params.tech_stack }}
+                    <div class="tech-stack">
+                        {{ range .Params.tech_stack }}
+                        <span class="tech-tag">{{ . }}</span>
+                        {{ end }}
+                    </div>
+                    {{ end }}
+                    
+                    <div class="project-links">
+                        <a href="{{ .Permalink }}" class="project-link primary">
+                            <span>View Details</span>
+                            <span class="arrow">→</span>
+                        </a>
+                        {{ if .Params.github }}
+                        <a href="{{ .Params.github }}" target="_blank" class="project-link github">
+                            <svg class="icon" viewBox="0 0 16 16" width="16" height="16">
+                                <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                            </svg>
+                            <span>Code</span>
+                        </a>
+                        {{ end }}
+                    </div>
+                </div>
+            </article>
+            {{ end }}
+        </div>
+    </section>
+    {{ end }}
+</div>
+{{ end }}
