@@ -99,7 +99,7 @@ function initLogoEffect() {
     const logo = document.querySelector('.logo');
     if (logo) {
         logo.addEventListener('mouseenter', () => {
-            logo.style.filter = 'hue-rotate(90deg)';
+            logo.style.filter = 'hue-rotate(190deg)';
         });
         logo.addEventListener('mouseleave', () => {
             logo.style.filter = 'none';

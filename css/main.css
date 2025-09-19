@@ -213,9 +213,8 @@ nav {
     font-weight: 700;
     margin-bottom: var(--space-md);
     background: linear-gradient(90deg, var(--text-primary), var(--terminal-green));  /* Orange gradient */
-    -webkit-background-clip: text;
     background-clip: text;
-    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
 }
 
 .hero .tagline {
@@ -656,9 +655,8 @@ footer {
     font-size: var(--font-size-4xl);
     margin-bottom: var(--space-md);
     background: linear-gradient(90deg, var(--text-primary), var(--terminal-green));
-    -webkit-background-clip: text;
     background-clip: text;
-    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
 }
 
 .projects-description {
