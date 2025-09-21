@@ -57,6 +57,12 @@ function initSmoothScroll() {
 
 // Reading time calculator
 function calculateReadingTime() {
+    // Check if reading time is enabled via Hugo site params
+    const showReadingTime = document.querySelector('meta[name="show-reading-time"]');
+    if (!showReadingTime || showReadingTime.content !== 'true') {
+        return;
+    }
+    
     const article = document.querySelector('article.post-content');
     if (article) {
         const text = article.textContent;

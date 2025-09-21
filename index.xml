@@ -1,18 +1,20 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Home on stumbl.ing</title><link>https://stumbl.ing/</link><description>Recent content in Home on stumbl.ing</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Mon, 01 Jan 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://stumbl.ing/index.xml" rel="self" type="application/rss+xml"/><item><title>About</title><link>https://stumbl.ing/about/</link><pubDate>Mon, 01 Jan 2024 00:00:00 +0000</pubDate><guid>https://stumbl.ing/about/</guid><description>&lt;h1 id="about-stumbling"&gt;About stumbl.ing&lt;/h1&gt;
-&lt;p&gt;I&amp;rsquo;m &lt;strong&gt;lockbox&lt;/strong&gt;, and I break things for fun, and make tools to do it faster the next time.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Home on stumbl.ing</title><link>https://stumbl.ing/</link><description>Recent content in Home on stumbl.ing</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Mon, 01 Jan 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://stumbl.ing/index.xml" rel="self" type="application/rss+xml"/><item><title>About</title><link>https://stumbl.ing/about/</link><pubDate>Mon, 01 Jan 2024 00:00:00 +0000</pubDate><guid>https://stumbl.ing/about/</guid><description>&lt;p&gt;I&amp;rsquo;m &lt;strong&gt;lockbox&lt;/strong&gt;, I&amp;rsquo;m an avid tinkerer and memer that likes to take things apart.&lt;/p&gt;
 &lt;h2 id="what-i-do"&gt;What I Do&lt;/h2&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;strong&gt;Reverse Engineering&lt;/strong&gt;: Specializing in legacy DSP architectures&lt;/li&gt;
 &lt;li&gt;&lt;strong&gt;Vulnerability Research&lt;/strong&gt;: Focus on RTOS/DSP bugs and embedded systems&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Tool Development&lt;/strong&gt;: Creator of the Styx emulator and various RE tools&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Research&lt;/strong&gt;: Binary similarity, SMT solving, systems understanding, emulation, egraphs&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Tool Development&lt;/strong&gt;: Creator of the Styx emulator and other RE tools&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Research&lt;/strong&gt;: Binary similarity, SMT solving, trace analysis, emulation, egraphs&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h2 id="current-focus"&gt;Current Focus&lt;/h2&gt;
-&lt;p&gt;I&amp;rsquo;m particularly interested in:&lt;/p&gt;
+&lt;p&gt;In my free time I&amp;rsquo;m interested in:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Improving the state of embedded system debugging&lt;/li&gt;
 &lt;li&gt;Reverse engineering communications equipment and custom protocols&lt;/li&gt;
-&lt;li&gt;RTOS exploitation techniques&lt;/li&gt;
+&lt;li&gt;RTOS &amp;ldquo;debugging&amp;rdquo;&lt;/li&gt;
 &lt;li&gt;Building better emulation tools for obscure architectures&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;I&amp;rsquo;m a rust developer by day, and am slowly turning into a &lt;a href="https://deno.land"&gt;deno&lt;/a&gt; fanboy.&lt;/p&gt;</description></item></channel></rss>
+&lt;h2 id="projects"&gt;Projects&lt;/h2&gt;
+&lt;h3 id="styx-emulator"&gt;&lt;a href="https://github.com/styx-emulator"&gt;Styx Emulator&lt;/a&gt;&lt;/h3&gt;
+&lt;p&gt;A new ground up emulator that focuses on creating composable and uniform tooling across all targets
+and supported systems. Also has a lot of built in tool integration, and is probably one of the
+easiest emulators to add target support to.&lt;/p&gt;</description></item></channel></rss>
