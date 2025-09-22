@@ -1,0 +1,79 @@
+{{- $url := .Get "url" | default (.Get 0) -}}
+{{- $title := .Get "title" | default "PDF Document" -}}
+{{- $height := .Get "height" | default "600px" -}}
+{{- $embedMode := .Get "mode" | default "FULL_WINDOW" -}}
+{{- $showAnnotationTools := .Get "annotations" | default "true" -}}
+{{- $showLeftHandPanel := .Get "panel" | default "true" -}}
+{{- $showDownloadPDF := .Get "download" | default "true" -}}
+{{- $showPrintPDF := .Get "print" | default "true" -}}
+{{- $showPageControls := .Get "controls" | default "true" -}}
+{{- $clientId := site.Params.adobe.pdfEmbedClientId | default "" -}}
+
+{{- if not $url -}}
+  <div class="pdf-error">Error: PDF URL is required</div>
+{{- else -}}
+  {{- $uniqueId := printf "adobe-dc-view-%s" (sha1 $url) -}}
+
+  {{- if $clientId -}}
+  <div class="pdf-embed-container">
+    <div id="{{ $uniqueId }}" style="height: {{ $height }}; width: 100%;"></div>
+  </div>
+  <script src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
+  <script type="text/javascript">
+    document.addEventListener("adobe_dc_view_sdk.ready", function() {
+      var adobeDCView = new AdobeDC.View({
+        clientId: "{{ $clientId }}",
+        divId: "{{ $uniqueId }}"
+      });
+
+      adobeDCView.previewFile({
+        content: {
+          location: {
+            url: "{{ $url }}"
+          }
+        },
+        metaData: {
+          fileName: "{{ $title }}"
+        }
+      }, {
+        embedMode: "{{ $embedMode }}",
+        showAnnotationTools: {{ $showAnnotationTools }},
+        showLeftHandPanel: {{ $showLeftHandPanel }},
+        showDownloadPDF: {{ $showDownloadPDF }},
+        showPrintPDF: {{ $showPrintPDF }},
+        showPageControls: {{ $showPageControls }}
+      });
+    });
+  </script>
+  {{- else -}}
+  <!-- Fallback to iframe if no Adobe client ID is configured -->
+  <div class="pdf-embed-container">
+    <iframe
+      src="{{ $url }}"
+      style="width: 100%; height: {{ $height }}; border: none;"
+      title="{{ $title }}">
+    </iframe>
+  </div>
+  <p style="text-align: center; margin-top: 10px;">
+    <a href="{{ $url }}" target="_blank" rel="noopener">Open PDF in new tab</a>
+  </p>
+  {{- end -}}
+{{- end -}}
+
+<style>
+.pdf-embed-container {
+  margin: 2rem 0;
+  border: 1px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.pdf-error {
+  padding: 1rem;
+  background-color: #ff330033;
+  border: 1px solid #ff3300;
+  border-radius: 4px;
+  color: #ff6600;
+  margin: 2rem 0;
+}
+</style>

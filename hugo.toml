@@ -26,6 +26,11 @@ pagerSize = 10
   showReadingTime = true
   defaultTheme = "dark"
 
+  # Adobe PDF Embed API
+  # Get your free client ID from: https://www.adobe.com/go/dcsdks_credentials
+  [params.adobe]
+    pdfEmbedClientId = ""
+
 [menu]
   [[menu.main]]
     name = "About"
