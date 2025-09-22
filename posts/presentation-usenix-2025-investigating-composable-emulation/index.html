@@ -1,0 +1,45 @@
+<!doctype html><html lang=en-us data-theme=dark><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Presentation: Usenix 2025 Investigating Composable Emulation | stumbl.ing</title><meta name=description content="Embedded shenanigans: DSP debugging, reverse engineering, and hardware teardowns"><meta name=show-reading-time content="true"><link rel=stylesheet href=/css/main.css><link rel=canonical href=https://stumbl.ing/posts/presentation-usenix-2025-investigating-composable-emulation/><link rel=alternate type=application/rss+xml href=/index.xml title=stumbl.ing><link rel=icon type=image/x-icon href=/favicon.ico><link rel=apple-touch-icon sizes=57x57 href=/apple-icon-57x57.png><link rel=apple-touch-icon sizes=60x60 href=/apple-icon-60x60.png><link rel=apple-touch-icon sizes=72x72 href=/apple-icon-72x72.png><link rel=apple-touch-icon sizes=76x76 href=/apple-icon-76x76.png><link rel=apple-touch-icon sizes=114x114 href=/apple-icon-114x114.png><link rel=apple-touch-icon sizes=120x120 href=/apple-icon-120x120.png><link rel=apple-touch-icon sizes=144x144 href=/apple-icon-144x144.png><link rel=apple-touch-icon sizes=152x152 href=/apple-icon-152x152.png><link rel=apple-touch-icon sizes=180x180 href=/apple-icon-180x180.png><link rel=icon type=image/png sizes=192x192 href=/android-icon-192x192.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=96x96 href=/favicon-96x96.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><meta name=msapplication-TileColor content="#ffffff"><meta name=msapplication-TileImage content="/ms-icon-144x144.png"><meta name=theme-color content="#ffffff"><meta name=generator content="Hugo 0.150.0"></head><body><header><div class=container><nav><a href=https://stumbl.ing/ class=site-title>stumbl.ing</a><div class=nav-links><a href=/about/>about</a>
+<a href=/projects/>projects</a>
+<a href=/posts/>archive</a>
+<a href=https://github.com/lockbox>github</a>
+<button class=theme-toggle aria-label="Toggle theme">☀️</button></div></nav></div></header><main><div class=container><article><header class=post-header><div class=post-meta><span class=post-date>2025-08-13</span>
+<span class=reading-time>4 min read</span></div><h1>Presentation: Usenix 2025 Investigating Composable Emulation</h1></header><div class=post-content><p>Recently an intern and I got to present some of the work we&rsquo;ve been doing (and are soon to publicly release
+open source!). This poster was received very well and gave us the opportunity to chat with a lot of the
+other emulation researchers (academic and commercial).</p><div class=pdf-embed-container><iframe src=/pdfs/Styx_Emulator_USENIX__25.pdf style=width:100%;height:600px;border:none title="PDF Document"></iframe></div><p style=text-align:center;margin-top:10px><a href=/pdfs/Styx_Emulator_USENIX__25.pdf target=_blank rel=noopener>Open PDF in new tab</a></p><style>.pdf-embed-container{margin:2rem 0;border:1px solid #333;border-radius:4px;overflow:hidden}.pdf-error{padding:1rem;background-color:#f303;border:1px solid #f30;border-radius:4px;color:#f60;margin:2rem 0}</style><h2 id=popular-questions>Popular Questions</h2><h3 id=what-execution-backend-are-you-using>What Execution Backend are you Using?</h3><p>Styx is the only emulation provider that lets you choose (or bring your own) execution backend.</p><p>Currently Styx packages:</p><ul><li>UNICORN</li><li>a PCODE Interpreter</li></ul><p>We are looking at adding some more options while we dial in our demands for a &ldquo;Styx backend&rdquo;, some
+of the low hanging fruit are:</p><ul><li>add bochs support</li><li>add icicle-emu</li><li>add a modern QEMU-cpu execution</li></ul><p>Contributions welcome ;) even a &ldquo;I would appreciate adding X backend&rdquo; would be nice to know!</p><h3 id=what-is-composable-emulation>What is Composable Emulation?</h3><p>This is a common question we got at USENIX, and deserves it&rsquo;s own post / article. Short answer:
+I made it up :)</p><p>Composable emulation is a nice bow on top of the many shortcomings emulation tools have when
+trying to use them to debug things. So far the design of emulation frameworks haven&rsquo;t seem to have ever really changed.
+QEMU gave the world one of the most usable emulators around, and even that is really only good for
+running linux or linux binaries. Or as I&rsquo;ve started to call it &ldquo;the intended use-case.&rdquo; From my
+arbitrary definition there are currently no emulation &ldquo;frameworks.&rdquo; I think AVATAR2 got us pretty close
+though.</p><p>Emulation tools today are not built to be <em>tailored</em> by users for their use-case.
+They are instead created to fulfill the purpose of the creators (which is fine, but important
+to understand how we got here).</p><p>The idea we have is to introduce a modicum of <em>composability</em> to the emulation process, specifically
+when developing for or debugging a specific target that depends on the low level target hardware
+semantics. You can usually get by using the core that the generic tools like QEMU use, and hack on
+the extra behavior you require for your use-case, but its not easy, and its absolutely not a
+maintainable practice. Our approach allows you to add the introspection you want, the peripherals
+you want etc. in a manner that solves your use-case. We still package pre-made configurations
+(otherwise it wouldn&rsquo;t really be usable in any sense of the word), but the moment you need to
+step outside the lines you can! and its well supported.</p><p>The current gap in emulation tools is a uniform interface that each component should implement,
+allowing the <strong>user</strong> to pick and choose which parts with which implementation will be used
+together.</p><p><strong>Composable Emulation</strong></p><h3 id=why-not-extend->Why not Extend <em>&ldquo;emulator name here&rdquo;</em>?</h3><p>QEMU is particularly hostile to adding plugins, and its primary goal is to run software
+fast. In the common emulation case you simply care about running software, if QEMU works, use it.</p><p>In the other case if your target is not supported or you need fine grained introspection, there
+is currently no other choice. UNICORN gets the easy part out of the way and gives you flexibility and
+instruction execution, with the tradeoff that you must implement all target details. Others
+have started to get there (icicle-emu, meta-emu etc.), but still sit where UNICORN does without
+adding much more than the &ldquo;potential&rdquo; for greater flexiblity.</p><p>The only other emulation framework that comes close is Renode, and that is a QEMU wrapper.
+We needed a way to rapidly add new architecture support, and QEMU isn&rsquo;t that.</p><p>While there is absolutely a &ldquo;Not Invented Here&rdquo; aspect, a lot of it comes down to wanting an
+environment that encourages experimentation with active developers. Bootstrapping with UNICORN
+allowed us to do just that, and eventually build our own PCODE interpreter in a couple weeks
+when we needed more architecture support.</p><h3 id=whats-next>What&rsquo;s next?</h3><p>Public Open Source Release :)</p><p>The main bottleneck with Styx at the moment is target support, there is a comfy rhythm adding
+target support as needed, but the main rough point of using an emulation framework will <em>always</em>
+be &ldquo;does it support my target <strong>now</strong>?&rdquo; As long as Styx has architecture support for it I hope the
+answer will be &ldquo;maybe, but if not it&rsquo;ll be easier than adding to someone else&rsquo;s tool.&rdquo;</p><p>I hope to people like it</p></div><div class=tag-list><a href=/tags/presentation class=tag>#presentation</a>
+<a href=/tags/usenix class=tag>#usenix</a>
+<a href=/tags/emulation class=tag>#emulation</a>
+<a href=/tags/styx class=tag>#styx</a></div><nav class=post-nav><a href=https://stumbl.ing/posts/offline-yubikey/ class=prev-post>← Offline Yubikey</a></nav></article></div></main><footer><div class=container><div class=footer-content><div class=footer-links><a href=/index.xml>RSS</a>
+<a href=https://github.com/lockbox>GitHub</a>
+<a href=https://github.com/struct-foo>struct-foo</a>
+<a href=https://infosec.exchange/@lockbox@infosec.exchange>Mastodon</a>
+<a href=https://twitter.com/lockbox4141>Twitter</a></div><div class=footer-copy>© 2025 stumbl.ing | stumbling forward</div></div></div></footer><script src=/js/main.js></script></body></html>
