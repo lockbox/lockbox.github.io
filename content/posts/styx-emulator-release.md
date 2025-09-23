@@ -527,7 +527,7 @@ I'm excited to see where Styx goes from here!
 Keep up with all updates, ask questions, and share your feedback:
 
 * **GitHub** → [styx-emulator][github]
-* **Twitter** → [@styx_emulator](https://x.com/StyxEmulator)
+* **Twitter** → [@styx_emulator](https://x.com/styx_emulator)
 * **Mastodon** → [@styx_emulator](https://infosec.exchange/@styx_emulator)
 
 Jump in today, help us shape the framework into something great and together we can make Styx the go-to emulator for debuggers of all shapes and sizes!
