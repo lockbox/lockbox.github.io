@@ -36,9 +36,63 @@ features that set it apart from all other emulation frameworks out there:
 
 In short: **Styx** comes bundled with fuzzing support, plugins, external tool integrations and multi-processor capabilities in order to bring modern tools to long forgotten architectures and targets.
 
+## Who should use Styx?
+
+Note that the amount of targets and peripherals currently supported in Styx is not large, but it
+is growing. In general our "should you bother using Styx" guidance we give people is:
+
+
+**When to use Styx**:
+
+* Your target isn't supported by QEMU, it will be significantly easier to add support to Styx
+* You need **harvard memory emulation**
+* You're developing an embedded system you're going to need to debug
+* You're looking for bugs in someone else's embedded system
+* You want to apples-to-apples your emulator execution backend against one we have in-tree
+* You're debugging a multi-processor system
+* You're debugging a driver and need more introspection
+
+But, especially if you're just booting and debugging linux or linux binaries, QEMU is
+probably plenty. QEMU is great when you fit the intended usecase, and its fast (it is the
+"quick" emulator after all). But sometimes you need to extend it in one way or another,
+or need new target support, thats where Styx shines.
+
 ## Birds-eye view of the Styx Approach
 
-`<abstraction picture here>`
+The Styx Emulator is written in Rust, which gave us the side effect of increased developer
+experience over the C/C++ lifestyle many of us are used to. Rust makes it possible
+to go-to definition of basically everything, something essentially impossible with the
+object oriented C of codebases like QEMU. It also allowed the team to punt on "perfect"
+data structure / ownership design with the `Arc<Mutex<T>>` copout until the features/speed
+tradeoff deemed it essential to solve. Two cool side effects we weren't expecting!
+
+Using Rust wasn't without its struggles though;
+particularly around the `Processor` / `ProcessorCore` / `Mmu` / `EventController` abstractions where
+we essentially have a bundle of sibling-level types with no clear ownership tree. We
+have had multiple iterations of the data structure and trait design, using and learning
+from all the big Rust codebases and blogs out there to try stuff that worked for our
+usecase. To complicate things even more, every abstraction we made and named we had to map
+back onto physical *things* as they relate to our debug/emulation targets. But eventually
+we found things that worked.
+
+Less a Rust and more a "strict typing" / software architecture win was having a set of
+defined and *importable* interfaces: this allows users of Styx to rapidly iterate on their target
+specifics **without worrying about the underlying emulation / emulator details**, and parallelize
+emulator development significantly easier than when working with other emulation tools.
+Our current (and pretty stable for awhile now) set of interfaces and components look like
+this:
+
+![Styx Emulator Architecture Diagram](/images/posts/styx-architecture-diagram.png)
+
+See [Core Concepts (below)](#Core-Concepts) or [Core Concepts (upstream)](https://docs.styx-emulator.org/concepts.html) For more information on the relation between the components in the diagram.
+
+This design encompasses all the major components of SoCs and microcontroller systems we've
+needed to model from the digital level on up. These core interfaces allow some pretty nifty
+spot-optimizations or "special case" design, and enable the next-level user configurability /
+customization piece from both Rust and any of the binding programming languages.
+
+See [my Post on our USENIX 2025 poster presentation](/posts/presentation-usenix-2025-investigating-composable-emulation/) for more details
+on more of the "why" and "how" of Styx. Continue reading for the what!
 
 ## Quickstart
 
@@ -103,17 +157,17 @@ fn assemble_code() -> Vec<u8> {
 }
 
 /// Callback for tracing instructions
-fn hook_code(cpu: CpuBackend) {
+fn hook_code(cpu: ProcessorCoreBackend) {
     println!(">>> Tracing instruction at 0x{:x}", cpu.pc().unwrap());
 }
 
 /// Callback for tracing basic blocks
-fn hook_block(_cpu: CpuBackend, address: u64, size: u32) {
+fn hook_block(_cpu: ProcessorCoreBackend, address: u64, size: u32) {
     println!(">>> Tracing basic block at 0x{:x}, block size = {}", address, size);
 }
 
 /// Callback for tracing interrupts
-fn hook_interrupts(cpu: CpuBackend, intno: i32) {
+fn hook_interrupts(cpu: ProcessorCoreBackend, intno: i32) {
     println!(">>> Tracing interrupt at 0x{:x}, interrupt number = {}", cpu.pc().unwrap(), intno);
     // quit emulation
     cpu.stop().unwrap();
@@ -405,15 +459,15 @@ use. [Here's](https://docs.styx-emulator.org/concepts.html) what we settled on.
 TLDR;
 
 * **Machine**: A physical **thing** made up of an arbitrary number of `Processor`s and `Device`s. When someone asks "Can you emulate my router?" the router would be the machine. Note that you do not often need the abstraction level of a "machine".
-* **Processor**: Something equivalent to a SoC (System on Chip). Where there's a "main" `Cpu`/set of `Cpu`s that executes the application code, but it may have a bunch of `Device`s, and sometimes comes with a CoProcessor etc which is just another `Cpu`/`Device`. A `Processor` also brings along with it `Memory`, `Peripheral`s, an `EventController`, and an `Mmu`.
-* **Cpu**: A single "core" that executes code from an ISA (Instruction Set Architecture), it gets passed a view into memory, and can decode+execute instructions. 
+* **Processor**: Something equivalent to a SoC (System on Chip). Where there's a "main" `ProcessorCore`/set of `ProcessorCore`s that executes the application code, but it may have a bunch of `Device`s, and sometimes comes with a CoProcessor etc which is just another `ProcessorCore`/`Device`. A `Processor` also brings along with it `Memory`, `Peripheral`s, an `EventController`, and an `Mmu`.
+* **ProcessorCore**: A single "core" that executes code from an ISA (Instruction Set Architecture), it gets passed a view into memory, and can decode+execute instructions. 
 * **Peripheral**: Something that performs I/O for the `TargetProgram`. Belongs to a single `EventController`+`Processor` pair at a time. eg. UART or Ethernet etc.
 * **Device**: Something that communicates to a `Processor` via a `Peripheral` or user custom hooks. eg. an I2C RTC (Real Time Clock) or thermometer module, can be another `Processor`.
-* **EventController**: The interrupt controller for a `Processor`, routes interrupts to I/O and redirects control flow of `Cpu`s as necessary.
+* **EventController**: The interrupt controller for a `Processor`, routes interrupts to I/O and redirects control flow of `ProcessorCore`s as necessary.
 * **Mmu**: Performs address translation an brokers access to the actual memory contents. As Styx is a generic framework the `Mmu` does not necessarily need to function as a full blown MMU if the target `Processor` does not require it.
 * **TargetProgram**: The specific **code** being debugged and emulated.
 
-A lot of these are pretty sensical, but the `Cpu`/`Processor` distinction was pretty arbitrary, but a necessary one in order to mentally grok the rust ownership model overlaid onto an incredibly complex relationship of types and data-structures. We also found that calling the *thing* running on the processor `TargetProgram` helped disambiguate what we were talking about, as then "firmware", "library" etc are free to represent what makes sense in the context (eg if the `TargetProgram` is a bare metal firmware, or a binary running in an emulated linux environment). 
+A lot of these are pretty sensical, however the `Cpu` / `ProcessorCore` / `Processor` distinction was a pretty arbitrary but necessary distinction in order to mentally grok the rust ownership model overlaid onto an incredibly complex relationship of types and data-structures. We also found that calling the *thing* running on the processor `TargetProgram` helped disambiguate what we were talking about, as then "firmware", "library" etc are free to represent what makes sense in the context (eg if the `TargetProgram` is a bare metal firmware, or a binary running in an emulated linux environment). 
 
 ## Questions we have for new users
 
@@ -447,6 +501,18 @@ going to be doing in the near future (feedback/input/contributions welcome, we w
 * Generic STM32 support?
 * Generic AVR support?
 
+
+
+## Credits
+
+Thank you to the Kudu Dynamics LLC development team, who have spent a lot of energy developing
+this from a side project all the way to a full-fledged usable tool. They continue to be the main development force behind the Styx Emulator.
+
+And thank you to some of the individuals who have had a major hand in shaping the project so far (feel free to dm me to add to the list):
+
+- Lennon Anderson ([@yurboirene](https://github.com/Yurboirene))
+
+I'm excited to see where Styx goes from here!
 
 ## Get Started
 1. **Follow the Docs** for installation and quick-start tutorials → [docs.styx-emulator.org](https://docs.styx-emulator.org)
