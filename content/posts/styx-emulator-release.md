@@ -9,7 +9,16 @@ summary: "Announcing the Public Release of the Styx Emulator"
 
 This has been a long time in the making. Today we're announcing the public release of the [**Styx Emulator**](https://github.com/styx-emulator/styx-emulator)!
 
-Styx is designed to be a foundational tool for building custom emulators with a focus on security research and building debug tooling for DSPs, CoProcessors, and weird SoCs. We hope you find it as useful as we do, and that it allows you to focus on target specifics rather than the underlying emulation mechanics. Some features we're proud of:
+## What is Styx?
+
+Styx is designed to be a foundational tool for building custom emulators with a focus on security research and debug tooling for DSPs, weird SoCs and embedded systems. We hope you find it as useful as we do for emulation tasks, and that it allows you to focus on target specifics rather than the underlying emulation mechanics. 
+
+So far we've found Styx to be usable in our daily emulation workflows and be a large
+improvement for the status quo (a la QEMU/PANDA + UNICORN/QILING etc.) specifically
+when debugging embedded systems and other targets that fit in the "non linux usermode"
+category.
+
+Some features we're proud of:
 
 * Built-in bug finding tools (libAFL, memory error detection plugins)
 * Built-in gdbserver with monitor commands
@@ -27,12 +36,15 @@ features that set it apart from all other emulation frameworks out there:
 
 In short: **Styx** comes bundled with fuzzing support, plugins, external tool integrations and multi-processor capabilities in order to bring modern tools to long forgotten architectures and targets.
 
+## Birds-eye view of the Styx Approach
+
+`<abstraction picture here>`
 
 ## Quickstart
 
 **NOTE**: Styx is currently only available as a library. Meaning you
 can pip install it, link against the C bindings, or include the rust
-library in your project.
+crate in your project.
 
 ### Simple quickstart
 
@@ -341,6 +353,45 @@ defer:
   return 0;
 }
 ```
+
+### GDB Server Example
+
+Want to run a gdbserver? Just switch out the `Executor` you're using!
+
+
+```rust
+use styx_emulator::core::processor::executor::Executor;
+use styx_emulator::prelude::*;
+use styx_emulator::processors::arm::kinetis21::*;
+use styx_emulator::cpu::arch::arm::gdb_targets::ArmMProfileDescription;
+use styx_emulator::plugins::gdb::{GdbExecutor, GdbPluginParams};
+use tracing::info;
+
+/// path to yaml description, see [`ParameterizedLoader`] for more
+const LOAD_YAML: &str = "load.yaml";
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // build the arguments to the gdb server plugin
+    let gdb_params = GdbPluginParams::tcp("0.0.0.0", 9999, true);
+
+    // build the processor
+    let proc = ProcessorBuilder::default()
+        .with_backend(Backend::Pcode)
+        .with_loader(ParameterizedLoader::default())
+        .with_executor(GdbExecutor::<ArmMProfileDescription>::new(gdb_params)?)
+        .with_plugin(ProcessorTracingPlugin)
+        .with_target_program(LOAD_YAML)
+        .build::<Kinetis21Builder>()?;
+
+    info!("Starting emulator");
+
+    proc.start()?;
+
+    Ok(())
+}
+```
+
+**NOTE**: The libAFL fuzzing executor works in a similar way.
 
 ### More Examples
 
