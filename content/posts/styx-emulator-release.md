@@ -510,7 +510,11 @@ this from a side project all the way to a full-fledged usable tool. They continu
 
 And thank you to some of the individuals who have had a major hand in shaping the project so far (feel free to dm me to add to the list):
 
-- Lennon Anderson ([@yurboirene](https://github.com/Yurboirene))
+- Lennon Anderson ([@YurBoiRene](https://github.com/YurBoiRene))
+- Jeff Eden ([@jeffeden](https://github.com/jeffeden))
+- Robert Meikle
+- Dillon Shaffer ([@Molkars](https://github.com/Molkars))
+- Ramesh Balaji ([@yuv418](https://github.com/yuv418))
 
 I'm excited to see where Styx goes from here!
 
