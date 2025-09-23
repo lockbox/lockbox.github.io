@@ -167,5 +167,5 @@ document.addEventListener('keydown', (e) => {
 // Console Easter egg
 console.log('%c> stumbl.ing', 'color: #ff6b35; font-size: 24px; font-weight: bold; text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);');
 console.log('%c[*] Systems loaded. Ready for reverse engineering.', 'color: #ff8c42; font-family: monospace;');
-console.log('%c[!] Found a bug? Report it at https://github.com/struct-foo', 'color: #8b949e; font-family: monospace;');
+console.log('%c[!] Found a bug? Report it at https://github.com/lockbox/lockbox.github.io', 'color: #8b949e; font-family: monospace;');
  
