@@ -1,0 +1,354 @@
+<!doctype html><html lang=en-us data-theme=dark><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Styx Emulator Public Release | stumbl.ing</title><meta name=description content="Embedded shenanigans: DSP debugging, reverse engineering, and hardware teardowns"><meta name=show-reading-time content="true"><link rel=stylesheet href=/css/main.css><link rel=canonical href=https://stumbl.ing/posts/styx-emulator-release/><link rel=alternate type=application/rss+xml href=/index.xml title=stumbl.ing><link rel=icon type=image/x-icon href=/favicon.ico><link rel=apple-touch-icon sizes=57x57 href=/apple-icon-57x57.png><link rel=apple-touch-icon sizes=60x60 href=/apple-icon-60x60.png><link rel=apple-touch-icon sizes=72x72 href=/apple-icon-72x72.png><link rel=apple-touch-icon sizes=76x76 href=/apple-icon-76x76.png><link rel=apple-touch-icon sizes=114x114 href=/apple-icon-114x114.png><link rel=apple-touch-icon sizes=120x120 href=/apple-icon-120x120.png><link rel=apple-touch-icon sizes=144x144 href=/apple-icon-144x144.png><link rel=apple-touch-icon sizes=152x152 href=/apple-icon-152x152.png><link rel=apple-touch-icon sizes=180x180 href=/apple-icon-180x180.png><link rel=icon type=image/png sizes=192x192 href=/android-icon-192x192.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=96x96 href=/favicon-96x96.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><meta name=msapplication-TileColor content="#ffffff"><meta name=msapplication-TileImage content="/ms-icon-144x144.png"><meta name=theme-color content="#ffffff"><meta name=generator content="Hugo 0.150.0"></head><body><header><div class=container><nav><a href=https://stumbl.ing/ class=site-title>stumbl.ing</a><div class=nav-links><a href=/about/>about</a>
+<a href=/projects/>projects</a>
+<a href=/posts/>archive</a>
+<a href=https://github.com/lockbox>github</a>
+<button class=theme-toggle aria-label="Toggle theme">☀️</button></div></nav></div></header><main><div class=container><article><header class=post-header><div class=post-meta><span class=post-date>2025-09-23</span>
+<span class=reading-time>12 min read</span></div><h1>Styx Emulator Public Release</h1></header><div class=post-content><p>This has been a long time in the making. Today we&rsquo;re announcing the public release of the <a href=https://github.com/styx-emulator/styx-emulator><strong>Styx Emulator</strong></a>!</p><h2 id=what-is-styx>What is Styx?</h2><p>Styx is designed to be a foundational tool for building custom emulators with a focus on security research and debug tooling for DSPs, weird SoCs and embedded systems. We hope you find it as useful as we do for emulation tasks, and that it allows you to focus on target specifics rather than the underlying emulation mechanics.</p><p>So far we&rsquo;ve found Styx to be usable in our daily emulation workflows and be a large
+improvement for the status quo (a la QEMU/PANDA + UNICORN/QILING etc.) specifically
+when debugging embedded systems and other targets that fit in the &ldquo;non linux usermode&rdquo;
+category.</p><p>Some features we&rsquo;re proud of:</p><ul><li>Built-in bug finding tools (libAFL, memory error detection plugins)</li><li>Built-in gdbserver with monitor commands</li><li>High performance, tunable cross-emulator tracebus</li><li>Programmatic I/O Access and Manipulation</li><li>Library-first to provide first-class tailoring support</li><li>(fledgling) Ghidra interop</li></ul><p>Styx is attempting to fill the gap in current emulation tools where nothing quite
+fits all the common needs of debugging embedded systems. In particular, Styx has two
+features that set it apart from all other emulation frameworks out there:</p><ul><li>letting users <em>choose from multiple instruction execution backends</em></li><li>letting users declaratively or programmatically <em>connect multiple processors</em> and peripherals together</li></ul><p>In short: <strong>Styx</strong> comes bundled with fuzzing support, plugins, external tool integrations and multi-processor capabilities in order to bring modern tools to long forgotten architectures and targets.</p><h2 id=who-should-use-styx>Who should use Styx?</h2><p>Note that the amount of targets and peripherals currently supported in Styx is not large, but it
+is growing. In general our &ldquo;should you bother using Styx&rdquo; guidance we give people is:</p><p><strong>When to use Styx</strong>:</p><ul><li>Your target isn&rsquo;t supported by QEMU, it will be significantly easier to add support to Styx</li><li>You need <strong>harvard memory emulation</strong></li><li>You&rsquo;re developing an embedded system you&rsquo;re going to need to debug</li><li>You&rsquo;re looking for bugs in someone else&rsquo;s embedded system</li><li>You want to apples-to-apples your emulator execution backend against one we have in-tree</li><li>You&rsquo;re debugging a multi-processor system</li><li>You&rsquo;re debugging a driver and need more introspection</li></ul><p>But, especially if you&rsquo;re just booting and debugging linux or linux binaries, QEMU is
+probably plenty. QEMU is great when you fit the intended usecase, and its fast (it is the
+&ldquo;quick&rdquo; emulator after all). But sometimes you need to extend it in one way or another,
+or need new target support, thats where Styx shines.</p><h2 id=birds-eye-view-of-the-styx-approach>Birds-eye view of the Styx Approach</h2><p>The Styx Emulator is written in Rust, which gave us the side effect of increased developer
+experience over the C/C++ lifestyle many of us are used to. Rust makes it possible
+to go-to definition of basically everything, something essentially impossible with the
+object oriented C of codebases like QEMU. It also allowed the team to punt on &ldquo;perfect&rdquo;
+data structure / ownership design with the <code>Arc&lt;Mutex&lt;T>></code> copout until the features/speed
+tradeoff deemed it essential to solve. Two cool side effects we weren&rsquo;t expecting!</p><p>Using Rust wasn&rsquo;t without its struggles though;
+particularly around the <code>Processor</code> / <code>ProcessorCore</code> / <code>Mmu</code> / <code>EventController</code> abstractions where
+we essentially have a bundle of sibling-level types with no clear ownership tree. We
+have had multiple iterations of the data structure and trait design, using and learning
+from all the big Rust codebases and blogs out there to try stuff that worked for our
+usecase. To complicate things even more, every abstraction we made and named we had to map
+back onto physical <em>things</em> as they relate to our debug/emulation targets. But eventually
+we found things that worked.</p><p>Less a Rust and more a &ldquo;strict typing&rdquo; / software architecture win was having a set of
+defined and <em>importable</em> interfaces: this allows users of Styx to rapidly iterate on their target
+specifics <strong>without worrying about the underlying emulation / emulator details</strong>, and parallelize
+emulator development significantly easier than when working with other emulation tools.
+Our current (and pretty stable for awhile now) set of interfaces and components look like
+this:</p><p><img src=/images/posts/styx-architecture-diagram.png alt="Styx Emulator Architecture Diagram"></p><p>See <a href=#Core-Concepts>Core Concepts (below)</a> or <a href=https://docs.styx-emulator.org/concepts.html>Core Concepts (upstream)</a> For more information on the relation between the components in the diagram.</p><p>This design encompasses all the major components of SoCs and microcontroller systems we&rsquo;ve
+needed to model from the digital level on up. These core interfaces allow some pretty nifty
+spot-optimizations or &ldquo;special case&rdquo; design, and enable the next-level user configurability /
+customization piece from both Rust and any of the binding programming languages.</p><p>See <a href=/posts/presentation-usenix-2025-investigating-composable-emulation/>my Post on our USENIX 2025 poster presentation</a> for more details
+on more of the &ldquo;why&rdquo; and &ldquo;how&rdquo; of Styx. Continue reading for the what!</p><h2 id=quickstart>Quickstart</h2><p><strong>NOTE</strong>: Styx is currently only available as a library. Meaning you
+can pip install it, link against the C bindings, or include the rust
+crate in your project.</p><h3 id=simple-quickstart>Simple quickstart</h3><p>Rust: see the <a href=https://docs.styx-emulator.org/installing.html#installing-from-source>installation docs</a> for information about adding to a rust project.</p><p>Python (see the <a href=https://docs.styx-emulator.org/installing.html#installing-from-source>installation docs</a> for dependency information):</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-shell data-lang=shell><span style=display:flex><span>git clone https://github.com/styx-emulator/styx-emulator
+</span></span><span style=display:flex><span>cargo install just
+</span></span><span style=display:flex><span>just setup
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># install python api into local virtual env</span>
+</span></span><span style=display:flex><span>. venv/bin/activate
+</span></span><span style=display:flex><span>pip install styx/bindings/styx-py-api
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e># now use the python api</span>
+</span></span><span style=display:flex><span>$ python
+</span></span><span style=display:flex><span>Python 3.12.8 <span style=color:#f92672>(</span>main, Dec  <span style=color:#ae81ff>6</span> 2024, 00:00:00<span style=color:#f92672>)</span> <span style=color:#f92672>[</span>GCC 14.2.1 <span style=color:#ae81ff>20240912</span> <span style=color:#f92672>(</span>Red Hat 14.2.1-3<span style=color:#f92672>)]</span> on linux
+</span></span><span style=display:flex><span>Type <span style=color:#e6db74>&#34;help&#34;</span>, <span style=color:#e6db74>&#34;copyright&#34;</span>, <span style=color:#e6db74>&#34;credits&#34;</span> or <span style=color:#e6db74>&#34;license&#34;</span> <span style=color:#66d9ef>for</span> more information.
+</span></span><span style=display:flex><span>&gt;&gt;&gt; import styx_emulator
+</span></span><span style=display:flex><span>&gt;&gt;&gt;
+</span></span></code></pre></div><h3 id=comparing-to-the-unicorn-example>Comparing to the UNICORN example</h3><p>(Straight from <a href=https://docs.styx-emulator.org/user/unicorn_replacement.html>Styx swapped for UNICORN</a>)</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#66d9ef>use</span> std::borrow::Cow;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::core::cpu::arch::arm::{ArmRegister, ArmVariants};
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::core::processor::executor::Executor;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::core::cpu::hooks::StyxHook;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::prelude::<span style=color:#f92672>*</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::processors::RawProcessor;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> keystone_engine::Keystone;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>/*
+</span></span></span><span style=display:flex><span><span style=color:#75715e>    MOV     R0, #5                ; Load 5 into register R0
+</span></span></span><span style=display:flex><span><span style=color:#75715e>    MOV     R1, #3                ; Load 3 into register R1
+</span></span></span><span style=display:flex><span><span style=color:#75715e>    MUL     R2, R0, R1            ; Multiply R0 by R1, store result in R2
+</span></span></span><span style=display:flex><span><span style=color:#75715e>    SVC     #0                    ; Trigger a software interrupt
+</span></span></span><span style=display:flex><span><span style=color:#75715e>*/</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>THUMB_CODE</span>: <span style=color:#66d9ef>&amp;</span><span style=color:#66d9ef>str</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;MOV R0, #5; MOV R1, #3; MUL R2, R0, R1; SVC #0&#34;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>/// Uses Keystone to assemble some Arm instructions and return the resulting bytes
+</span></span></span><span style=display:flex><span><span style=color:#e6db74></span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>assemble_code</span>() -&gt; Vec<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>u8</span><span style=color:#f92672>&gt;</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> ks <span style=color:#f92672>=</span> Keystone::new(keystone_engine::Arch::<span style=color:#66d9ef>ARM</span>, keystone_engine::Mode::<span style=color:#66d9ef>THUMB</span>)
+</span></span><span style=display:flex><span>        .expect(<span style=color:#e6db74>&#34;Could not initialize Keystone engine&#34;</span>);
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> asm <span style=color:#f92672>=</span> ks
+</span></span><span style=display:flex><span>        .asm(<span style=color:#66d9ef>THUMB_CODE</span>.to_string(), <span style=color:#ae81ff>0x4000</span>)
+</span></span><span style=display:flex><span>        .expect(<span style=color:#e6db74>&#34;Could not assemble&#34;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>println!</span>(<span style=color:#e6db74>&#34;Assembled </span><span style=color:#e6db74>{}</span><span style=color:#e6db74> instructions&#34;</span>, asm.stat_count);
+</span></span><span style=display:flex><span>    asm.bytes
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>/// Callback for tracing instructions
+</span></span></span><span style=display:flex><span><span style=color:#e6db74></span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>hook_code</span>(cpu: <span style=color:#a6e22e>ProcessorCoreBackend</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>println!</span>(<span style=color:#e6db74>&#34;&gt;&gt;&gt; Tracing instruction at 0x</span><span style=color:#e6db74>{:x}</span><span style=color:#e6db74>&#34;</span>, cpu.pc().unwrap());
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>/// Callback for tracing basic blocks
+</span></span></span><span style=display:flex><span><span style=color:#e6db74></span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>hook_block</span>(_cpu: <span style=color:#a6e22e>ProcessorCoreBackend</span>, address: <span style=color:#66d9ef>u64</span>, size: <span style=color:#66d9ef>u32</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>println!</span>(<span style=color:#e6db74>&#34;&gt;&gt;&gt; Tracing basic block at 0x</span><span style=color:#e6db74>{:x}</span><span style=color:#e6db74>, block size = </span><span style=color:#e6db74>{}</span><span style=color:#e6db74>&#34;</span>, address, size);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>/// Callback for tracing interrupts
+</span></span></span><span style=display:flex><span><span style=color:#e6db74></span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>hook_interrupts</span>(cpu: <span style=color:#a6e22e>ProcessorCoreBackend</span>, intno: <span style=color:#66d9ef>i32</span>) {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>println!</span>(<span style=color:#e6db74>&#34;&gt;&gt;&gt; Tracing interrupt at 0x</span><span style=color:#e6db74>{:x}</span><span style=color:#e6db74>, interrupt number = </span><span style=color:#e6db74>{}</span><span style=color:#e6db74>&#34;</span>, cpu.pc().unwrap(), intno);
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// quit emulation
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    cpu.stop().unwrap();
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>main</span>() -&gt; Result<span style=color:#f92672>&lt;</span>(), Box<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>dyn</span> std::error::Error<span style=color:#f92672>&gt;&gt;</span> {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// create a RawProcessor (i.e. minimal processor) for 32 bit Arm LE, using the PCode backend
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    <span style=color:#66d9ef>let</span> proc <span style=color:#f92672>=</span> ProcessorBuilder::default()
+</span></span><span style=display:flex><span>        .with_backend(Backend::Pcode)
+</span></span><span style=display:flex><span>        .with_endian(ArchEndian::LittleEndian)
+</span></span><span style=display:flex><span>        .with_variant(ArmVariants::ArmCortexM4)
+</span></span><span style=display:flex><span>        .with_loader(RawLoader)
+</span></span><span style=display:flex><span>        .with_executor(Executor::default())
+</span></span><span style=display:flex><span>        .with_input_bytes(Cow::Owned(assemble_code()))
+</span></span><span style=display:flex><span>        .build::<span style=color:#f92672>&lt;</span>RawProcessor<span style=color:#f92672>&gt;</span>()<span style=color:#f92672>?</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// add hooks for instructions, basic blocks, and interrupts
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    proc.add_hook(StyxHook::Code { start: <span style=color:#66d9ef>u64</span>::<span style=color:#66d9ef>MIN</span>, end: <span style=color:#66d9ef>u64</span>::<span style=color:#66d9ef>MAX</span>, callback: Box::new(hook_code) })<span style=color:#f92672>?</span>;
+</span></span><span style=display:flex><span>    proc.add_hook(StyxHook::Block { callback: Box::new(hook_block) })<span style=color:#f92672>?</span>;
+</span></span><span style=display:flex><span>    proc.add_hook(StyxHook::Interrupt { callback: Box::new(hook_interrupts) })<span style=color:#f92672>?</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// start emulation
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    proc.start()<span style=color:#f92672>?</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// check that R2 holds the value 15 to see if emulation was successful
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    <span style=color:#a6e22e>assert_eq!</span>(proc.read_register::<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>u32</span><span style=color:#f92672>&gt;</span>(ArmRegister::R2).unwrap(), <span style=color:#ae81ff>15_</span><span style=color:#66d9ef>u32</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Ok(())
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=premade-processor-quickstart>Premade processor quickstart</h3><p>To use a prepackaged processor its as easy as:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::core::processor::executor::Executor;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::prelude::<span style=color:#f92672>*</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::processors::arm::kinetis21::<span style=color:#f92672>*</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> tracing::info;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>/// path to yaml description, see [`ParameterizedLoader`] for more
+</span></span></span><span style=display:flex><span><span style=color:#e6db74></span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>LOAD_YAML</span>: <span style=color:#66d9ef>&amp;</span><span style=color:#66d9ef>str</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;load.yaml&#34;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>main</span>() -&gt; Result<span style=color:#f92672>&lt;</span>(), Box<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>dyn</span> std::error::Error<span style=color:#f92672>&gt;&gt;</span> {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> proc <span style=color:#f92672>=</span> ProcessorBuilder::default()
+</span></span><span style=display:flex><span>        .with_backend(Backend::Pcode)
+</span></span><span style=display:flex><span>        .with_loader(ParameterizedLoader::default())
+</span></span><span style=display:flex><span>        .with_executor(Executor::default())
+</span></span><span style=display:flex><span>        .with_plugin(ProcessorTracingPlugin)
+</span></span><span style=display:flex><span>        .with_target_program(<span style=color:#66d9ef>LOAD_YAML</span>)
+</span></span><span style=display:flex><span>        .build::<span style=color:#f92672>&lt;</span>Kinetis21Builder<span style=color:#f92672>&gt;</span>()<span style=color:#f92672>?</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>info!</span>(<span style=color:#e6db74>&#34;Starting emulator&#34;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    proc.start()<span style=color:#f92672>?</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Ok(())
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=bindings>Bindings!</h3><p>Or using the python bindings:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-python data-lang=python><span style=display:flex><span><span style=color:#f92672>from</span> styx_emulator.cpu.hooks <span style=color:#f92672>import</span> CodeHook
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> styx_emulator.processor <span style=color:#f92672>import</span> ProcessorBuilder, Target
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> styx_emulator.loader <span style=color:#f92672>import</span> RawLoader
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> styx_emulator.executor <span style=color:#f92672>import</span> DefaultExecutor
+</span></span><span style=display:flex><span><span style=color:#f92672>from</span> styx_emulator.plugin <span style=color:#f92672>import</span> ProcessorTracingPlugin
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>def</span> <span style=color:#a6e22e>log_signal</span>(_):
+</span></span><span style=display:flex><span>    print(<span style=color:#e6db74>&#34;ERROR: signal&#34;</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>builder <span style=color:#f92672>=</span> ProcessorBuilder()
+</span></span><span style=display:flex><span>builder<span style=color:#f92672>.</span>target_program <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;target.bin&#34;</span>
+</span></span><span style=display:flex><span>builder<span style=color:#f92672>.</span>ipc_port <span style=color:#f92672>=</span> <span style=color:#ae81ff>16001</span>
+</span></span><span style=display:flex><span>builder<span style=color:#f92672>.</span>loader <span style=color:#f92672>=</span> RawLoader()
+</span></span><span style=display:flex><span>builder<span style=color:#f92672>.</span>executor <span style=color:#f92672>=</span> DefaultExecutor()
+</span></span><span style=display:flex><span>builder<span style=color:#f92672>.</span>add_plugin(ProcessorTracingPlugin())
+</span></span><span style=display:flex><span>proc <span style=color:#f92672>=</span> builder<span style=color:#f92672>.</span>build(Target<span style=color:#f92672>.</span>Stm32f107)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>proc<span style=color:#f92672>.</span>add_hook(CodeHook(<span style=color:#ae81ff>0x690C</span>, <span style=color:#ae81ff>0x690D</span>, log_signal))
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>proc<span style=color:#f92672>.</span>start()
+</span></span></code></pre></div><p>And real C bindings:</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-c data-lang=c><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&#34;stdio.h&#34;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&#34;styx_emulator.h&#34;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;stdint.h&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;string.h&gt;</span><span style=color:#75715e>
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>
+</span></span><span style=display:flex><span><span style=color:#75715e>#define TARGET_PGM                                                   \
+</span></span></span><span style=display:flex><span><span style=color:#75715e>  &#34;target.bin&#34;
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>log_signal</span>(StyxProcessorCore cpu)
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  (<span style=color:#66d9ef>void</span>)cpu;
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// look at this: it prints
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#66d9ef>uint64_t</span> pc;
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>StyxProcessorCore_pc</span>(cpu, <span style=color:#f92672>&amp;</span>pc);
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;Hit loop @ pc 0x%lX</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, pc);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>handle_error</span>(StyxFFIError error)
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  StyxFFIErrorMsg_t msg <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxFFIErrorMsg</span>(error);
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;uh oh: %s</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, msg);
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>StyxFFIErrorMsg_free</span>(msg);
+</span></span><span style=display:flex><span>}
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>int</span> <span style=color:#a6e22e>main</span>(<span style=color:#66d9ef>void</span>)
+</span></span><span style=display:flex><span>{
+</span></span><span style=display:flex><span>  StyxFFIErrorPtr error <span style=color:#f92672>=</span> NULL;
+</span></span><span style=display:flex><span>  StyxProcessorBuilder builder <span style=color:#f92672>=</span> NULL;
+</span></span><span style=display:flex><span>  StyxExecutor executor <span style=color:#f92672>=</span> NULL;
+</span></span><span style=display:flex><span>  StyxPlugin procTracePlugin <span style=color:#f92672>=</span> NULL;
+</span></span><span style=display:flex><span>  StyxLoader loader <span style=color:#f92672>=</span> NULL;
+</span></span><span style=display:flex><span>  StyxProcessor proc <span style=color:#f92672>=</span> NULL;
+</span></span><span style=display:flex><span>  StyxEmulationReport report <span style=color:#f92672>=</span> NULL;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// enable styx logging
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#75715e>// Styx_init_logging(5, &#34;trace&#34;);
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// create the builder
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_new</span>(<span style=color:#f92672>&amp;</span>builder)))
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// set the executor
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxExecutor_Executor_default</span>(<span style=color:#f92672>&amp;</span>executor)))
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_set_executor</span>(builder, executor);
+</span></span><span style=display:flex><span>  executor <span style=color:#f92672>=</span> NULL;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (error)
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_set_backend</span>(builder, STYX_BACKEND_UNICORN)))
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// set the loader
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxLoader_RawLoader_new</span>(<span style=color:#f92672>&amp;</span>loader)))
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_set_loader</span>(builder, loader);
+</span></span><span style=display:flex><span>  loader <span style=color:#f92672>=</span> NULL;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (error)
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxPlugin_ProcessorTracingPlugin_default</span>(<span style=color:#f92672>&amp;</span>procTracePlugin)))
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_add_plugin</span>(builder, procTracePlugin);
+</span></span><span style=display:flex><span>  procTracePlugin <span style=color:#f92672>=</span> NULL;
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (error)
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// set the target program
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_set_target_program</span>(
+</span></span><span style=display:flex><span>           builder, TARGET_PGM, (<span style=color:#66d9ef>uint32_t</span>)<span style=color:#a6e22e>strlen</span>(TARGET_PGM))))
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// have the cpu use 16001 as the Ipc port
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_set_ipc_port</span>(builder, <span style=color:#ae81ff>16001</span>)))
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// add a code hook just to test that hooks indeed work
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  StyxHook_Code log_signal_hook <span style=color:#f92672>=</span> {
+</span></span><span style=display:flex><span>      .start <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x590e</span>,
+</span></span><span style=display:flex><span>      .end <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x590e</span>,
+</span></span><span style=display:flex><span>      .callback <span style=color:#f92672>=</span> log_signal,
+</span></span><span style=display:flex><span>  };
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_add_code_hook</span>(builder, log_signal_hook)))
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// build the processor
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;[*] building processor</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span>
+</span></span><span style=display:flex><span>           <span style=color:#a6e22e>StyxProcessorBuilder_build</span>(builder, STYX_TARGET_STM32F107, <span style=color:#f92672>&amp;</span>proc)))
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>/// dispose the builder
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#a6e22e>StyxProcessorBuilder_free</span>(<span style=color:#f92672>&amp;</span>builder);
+</span></span><span style=display:flex><span>  builder <span style=color:#f92672>=</span> NULL;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#75715e>// this runs the cpu (blocking)
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;[*] running processor</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessor_start_blocking_constraints</span>(proc, <span style=color:#ae81ff>1000</span>, <span style=color:#ae81ff>1000</span>, <span style=color:#f92672>&amp;</span>report)))
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;[*] processor stopped</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>int</span> instructions <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxEmulationReport_instructions</span>(report);
+</span></span><span style=display:flex><span>  <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;[*] total instructions executed: %i</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, instructions);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>defer:
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (error)
+</span></span><span style=display:flex><span>  {
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>handle_error</span>(<span style=color:#f92672>*</span>error);
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>StyxFFIErrorPtr_free</span>(<span style=color:#f92672>&amp;</span>error);
+</span></span><span style=display:flex><span>  }
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (builder)
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>StyxProcessorBuilder_free</span>(<span style=color:#f92672>&amp;</span>builder);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (executor)
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>StyxExecutor_free</span>(<span style=color:#f92672>&amp;</span>executor);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (procTracePlugin)
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>StyxPlugin_free</span>(<span style=color:#f92672>&amp;</span>procTracePlugin);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (loader)
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>StyxLoader_free</span>(<span style=color:#f92672>&amp;</span>loader);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> (proc)
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>StyxProcessor_free</span>(<span style=color:#f92672>&amp;</span>proc);
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>return</span> <span style=color:#ae81ff>0</span>;
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><h3 id=gdb-server-example>GDB Server Example</h3><p>Want to run a gdbserver? Just switch out the <code>Executor</code> you&rsquo;re using!</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-rust data-lang=rust><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::core::processor::executor::Executor;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::prelude::<span style=color:#f92672>*</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::processors::arm::kinetis21::<span style=color:#f92672>*</span>;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::cpu::arch::arm::gdb_targets::ArmMProfileDescription;
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> styx_emulator::plugins::gdb::{GdbExecutor, GdbPluginParams};
+</span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> tracing::info;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#e6db74>/// path to yaml description, see [`ParameterizedLoader`] for more
+</span></span></span><span style=display:flex><span><span style=color:#e6db74></span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>LOAD_YAML</span>: <span style=color:#66d9ef>&amp;</span><span style=color:#66d9ef>str</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;load.yaml&#34;</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>main</span>() -&gt; Result<span style=color:#f92672>&lt;</span>(), Box<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>dyn</span> std::error::Error<span style=color:#f92672>&gt;&gt;</span> {
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// build the arguments to the gdb server plugin
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    <span style=color:#66d9ef>let</span> gdb_params <span style=color:#f92672>=</span> GdbPluginParams::tcp(<span style=color:#e6db74>&#34;0.0.0.0&#34;</span>, <span style=color:#ae81ff>9999</span>, <span style=color:#66d9ef>true</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#75715e>// build the processor
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    <span style=color:#66d9ef>let</span> proc <span style=color:#f92672>=</span> ProcessorBuilder::default()
+</span></span><span style=display:flex><span>        .with_backend(Backend::Pcode)
+</span></span><span style=display:flex><span>        .with_loader(ParameterizedLoader::default())
+</span></span><span style=display:flex><span>        .with_executor(GdbExecutor::<span style=color:#f92672>&lt;</span>ArmMProfileDescription<span style=color:#f92672>&gt;</span>::new(gdb_params)<span style=color:#f92672>?</span>)
+</span></span><span style=display:flex><span>        .with_plugin(ProcessorTracingPlugin)
+</span></span><span style=display:flex><span>        .with_target_program(<span style=color:#66d9ef>LOAD_YAML</span>)
+</span></span><span style=display:flex><span>        .build::<span style=color:#f92672>&lt;</span>Kinetis21Builder<span style=color:#f92672>&gt;</span>()<span style=color:#f92672>?</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    <span style=color:#a6e22e>info!</span>(<span style=color:#e6db74>&#34;Starting emulator&#34;</span>);
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    proc.start()<span style=color:#f92672>?</span>;
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>    Ok(())
+</span></span><span style=display:flex><span>}
+</span></span></code></pre></div><p><strong>NOTE</strong>: The libAFL fuzzing executor works in a similar way.</p><h3 id=more-examples>More Examples</h3><p>See <code>./examples</code> in the repo for more examples!</p><h2 id=core-concepts>Core Concepts</h2><p>One of the things we had to establish early on is what form of overloaded terminology we would
+use. <a href=https://docs.styx-emulator.org/concepts.html>Here&rsquo;s</a> what we settled on.</p><p>TLDR;</p><ul><li><strong>Machine</strong>: A physical <strong>thing</strong> made up of an arbitrary number of <code>Processor</code>s and <code>Device</code>s. When someone asks &ldquo;Can you emulate my router?&rdquo; the router would be the machine. Note that you do not often need the abstraction level of a &ldquo;machine&rdquo;.</li><li><strong>Processor</strong>: Something equivalent to a SoC (System on Chip). Where there&rsquo;s a &ldquo;main&rdquo; <code>ProcessorCore</code>/set of <code>ProcessorCore</code>s that executes the application code, but it may have a bunch of <code>Device</code>s, and sometimes comes with a CoProcessor etc which is just another <code>ProcessorCore</code>/<code>Device</code>. A <code>Processor</code> also brings along with it <code>Memory</code>, <code>Peripheral</code>s, an <code>EventController</code>, and an <code>Mmu</code>.</li><li><strong>ProcessorCore</strong>: A single &ldquo;core&rdquo; that executes code from an ISA (Instruction Set Architecture), it gets passed a view into memory, and can decode+execute instructions.</li><li><strong>Peripheral</strong>: Something that performs I/O for the <code>TargetProgram</code>. Belongs to a single <code>EventController</code>+<code>Processor</code> pair at a time. eg. UART or Ethernet etc.</li><li><strong>Device</strong>: Something that communicates to a <code>Processor</code> via a <code>Peripheral</code> or user custom hooks. eg. an I2C RTC (Real Time Clock) or thermometer module, can be another <code>Processor</code>.</li><li><strong>EventController</strong>: The interrupt controller for a <code>Processor</code>, routes interrupts to I/O and redirects control flow of <code>ProcessorCore</code>s as necessary.</li><li><strong>Mmu</strong>: Performs address translation an brokers access to the actual memory contents. As Styx is a generic framework the <code>Mmu</code> does not necessarily need to function as a full blown MMU if the target <code>Processor</code> does not require it.</li><li><strong>TargetProgram</strong>: The specific <strong>code</strong> being debugged and emulated.</li></ul><p>A lot of these are pretty sensical, however the <code>Cpu</code> / <code>ProcessorCore</code> / <code>Processor</code> distinction was a pretty arbitrary but necessary distinction in order to mentally grok the rust ownership model overlaid onto an incredibly complex relationship of types and data-structures. We also found that calling the <em>thing</em> running on the processor <code>TargetProgram</code> helped disambiguate what we were talking about, as then &ldquo;firmware&rdquo;, &ldquo;library&rdquo; etc are free to represent what makes sense in the context (eg if the <code>TargetProgram</code> is a bare metal firmware, or a binary running in an emulated linux environment).</p><h2 id=questions-we-have-for-new-users>Questions we have for new users</h2><p>We&rsquo;ve been working on this for a long time, but we still believe that we have a long
+way to go before this is a solid emulation tool. In particular we&rsquo;re curious and would
+like to know your opinions on:</p><ul><li>How is it making a custom processor?</li><li>Does debugging <em>just work</em>?</li><li>How quickly can <em>completely new</em> people add processor and/or architecture definitions?</li><li>How easy is it for contributors to add new execution backends? (Think something like <code>bochscpu</code>, <code>icicle-emu</code> etc.)</li><li>How do people feel about the built-in peripheral interfaces? (We haven&rsquo;t settled on how to make those nice yet, they should all be a little clunky)</li><li>What would be useful additions to the bindings?</li><li>What would people want from a &ldquo;binary installation&rdquo; of <strong>Styx</strong>? Currently we have only focused attention on building a solid library
+as a foundation to quickly deliver emulated targets</li><li>What would make <strong>Styx</strong> better?</li><li>What other architectures should we add in-tree? (If it&rsquo;s supported by <a href=https://github.com/NationalSecurityAgency/ghidra>Ghidra</a> it&rsquo;s a pretty low lift depending on how many custom <code>pcodeop</code>&rsquo;s are defined for the architecture)</li></ul><h2 id=whats-on-the-roadmap>Whats on the Roadmap?</h2><p>We are focused on a bunch of different things, but here are some of the things that we&rsquo;re
+going to be doing in the near future (feedback/input/contributions welcome, we will be updating the public roadmap in the near future)</p><ul><li>Smooth multi-emulator orchestration from configuration files (Almost complete)</li><li>Android phone full-system emulators (the <strong>whole</strong> kit and kaboodle, AP+Cellular+WiFI/BT included)</li><li>Styx installation artifacts (&lsquo;25 Q4?)</li><li>Better tracebus utilities</li><li>More target support</li><li>PCI-E emulation!</li><li>Linux device tree based emulation (given a firmware and a device tree, create an emulator)</li><li>Generic STM32 support?</li><li>Generic AVR support?</li></ul><h2 id=credits>Credits</h2><p>Thank you to the Kudu Dynamics LLC development team, who have spent a lot of energy developing
+this from a side project all the way to a full-fledged usable tool. They continue to be the main development force behind the Styx Emulator.</p><p>And thank you to some of the individuals who have had a major hand in shaping the project so far (feel free to dm me to add to the list):</p><ul><li>Lennon Anderson (<a href=https://github.com/YurBoiRene>@YurBoiRene</a>)</li><li>Jeff Eden (<a href=https://github.com/jeffeden>@jeffeden</a>)</li><li>Robert Meikle</li><li>Dillon Shaffer (<a href=https://github.com/Molkars>@Molkars</a>)</li><li>Ramesh Balaji (<a href=https://github.com/yuv418>@yuv418</a>)</li></ul><p>I&rsquo;m excited to see where Styx goes from here!</p><h2 id=get-started>Get Started</h2><ol><li><strong>Follow the Docs</strong> for installation and quick-start tutorials → <a href=https://docs.styx-emulator.org>docs.styx-emulator.org</a></li><li><strong>Join the Conversation</strong> on the community Discord for Q&amp;A and to meet everyone → <a href=Discord>discord.gg/styx-emulator</a></li></ol><h2 id=stay-connected>Stay Connected</h2><p>Keep up with all updates, ask questions, and share your feedback:</p><ul><li><strong>GitHub</strong> → <a href=https://github.com/styx-emulator>styx-emulator</a></li><li><strong>Twitter</strong> → <a href=https://x.com/styx_emulator>@styx_emulator</a></li><li><strong>Mastodon</strong> → <a href=https://infosec.exchange/@styx_emulator>@styx_emulator</a></li></ul><p>Jump in today, help us shape the framework into something great and together we can make Styx the go-to emulator for debuggers of all shapes and sizes!</p></div><div class=tag-list><a href=/tags/styx class=tag>#styx</a>
+<a href=/tags/tool class=tag>#tool</a>
+<a href=/tags/release class=tag>#release</a></div><nav class=post-nav><a href=https://stumbl.ing/posts/presentation-usenix-2025-investigating-composable-emulation/ class=prev-post>← Presentation: Usenix 2025 Investigating Composable Emulation</a></nav></article></div></main><footer><div class=container><div class=footer-content><div class=footer-links><a href=/index.xml>RSS</a>
+<a href=https://github.com/lockbox>GitHub</a>
+<a href=https://github.com/struct-foo>struct-foo</a>
+<a href=https://infosec.exchange/@lockbox@infosec.exchange>Mastodon</a>
+<a href=https://twitter.com/lockbox4141>Twitter</a></div><div class=footer-copy>© 2025 stumbl.ing | stumbling forward</div></div></div></footer><script src=/js/main.js></script></body></html>
