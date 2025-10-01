@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Cyclone on stumbl.ing</title><link>https://stumbl.ing/tags/cyclone/</link><description>Recent content in Cyclone on stumbl.ing</description><generator>Hugo</generator><language>en-us</language><lastBuildDate>Sun, 18 Feb 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://stumbl.ing/tags/cyclone/index.xml" rel="self" type="application/rss+xml"/><item><title>Simplified Boot Flow for the Cyclone V</title><link>https://stumbl.ing/posts/cyclone-v-boot/</link><pubDate>Sun, 18 Feb 2024 00:00:00 +0000</pubDate><guid>https://stumbl.ing/posts/cyclone-v-boot/</guid><description>&lt;!-- raw HTML omitted --&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="#executing-user-software"&gt;Executing User Software&lt;/a&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="#preloader-image-requirements"&gt;PreLoader Image Requirements&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#preloader-actions"&gt;PreLoader Actions&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#preloader-memory-state"&gt;PreLoader Memory State&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#bootloader-execution--u-boot"&gt;Bootloader execution (u-boot)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#operating-system-boot"&gt;Operating System Boot&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- raw HTML omitted --&gt;
+&lt;p&gt;The &lt;a href="https://www.intel.com/content/www/us/en/docs/programmable/683126/21-2/hard-processor-system-technical-reference.html"&gt;Cyclone V Technical Reference Manual&lt;/a&gt;
+details the boot flow for the common &amp;ldquo;running linux to boot your FPGA&amp;rdquo; usecase like so:&lt;/p&gt;
+&lt;p&gt;&lt;!-- raw HTML omitted --&gt;&lt;!-- raw HTML omitted --&gt;&lt;/p&gt;
+&lt;figure&gt;&lt;img src="https://stumbl.ing/images/posts/manual-boot-flow.png"
+ alt="Figure 1: Technical Reference Manual Diagram of Typical Boot Flow"&gt;&lt;figcaption&gt;
+ &lt;p&gt;&lt;!-- raw HTML omitted --&gt;Figure 1: &lt;!-- raw HTML omitted --&gt;Technical Reference Manual Diagram of Typical Boot Flow&lt;/p&gt;</description></item></channel></rss>
