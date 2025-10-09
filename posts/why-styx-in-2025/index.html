@@ -1,0 +1,78 @@
+<!doctype html><html lang=en-us data-theme=dark><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Why Styx in 2025 | stumbl.ing</title><meta name=description content="Embedded shenanigans: DSP debugging, reverse engineering, and hardware teardowns"><meta name=show-reading-time content="true"><link rel=stylesheet href=/css/main.css><link rel=canonical href=https://stumbl.ing/posts/why-styx-in-2025/><link rel=alternate type=application/rss+xml href=/index.xml title=stumbl.ing><link rel=icon type=image/x-icon href=/favicon.ico><link rel=apple-touch-icon sizes=57x57 href=/apple-icon-57x57.png><link rel=apple-touch-icon sizes=60x60 href=/apple-icon-60x60.png><link rel=apple-touch-icon sizes=72x72 href=/apple-icon-72x72.png><link rel=apple-touch-icon sizes=76x76 href=/apple-icon-76x76.png><link rel=apple-touch-icon sizes=114x114 href=/apple-icon-114x114.png><link rel=apple-touch-icon sizes=120x120 href=/apple-icon-120x120.png><link rel=apple-touch-icon sizes=144x144 href=/apple-icon-144x144.png><link rel=apple-touch-icon sizes=152x152 href=/apple-icon-152x152.png><link rel=apple-touch-icon sizes=180x180 href=/apple-icon-180x180.png><link rel=icon type=image/png sizes=192x192 href=/android-icon-192x192.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=96x96 href=/favicon-96x96.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><meta name=msapplication-TileColor content="#ffffff"><meta name=msapplication-TileImage content="/ms-icon-144x144.png"><meta name=theme-color content="#ffffff"><meta name=generator content="Hugo 0.151.0"></head><body><header><div class=container><nav><a href=https://stumbl.ing/ class=site-title>stumbl.ing</a><div class=nav-links><a href=/about/>about</a>
+<a href=/projects/>projects</a>
+<a href=/posts/>archive</a>
+<a href=https://github.com/lockbox>github</a>
+<button class=theme-toggle aria-label="Toggle theme">☀️</button></div></nav></div></header><main><div class=container><article><header class=post-header><div class=post-meta><span class=post-date>2025-10-09</span>
+<span class=reading-time>7 min read</span></div><h1>Why Styx in 2025</h1></header><div class=post-content><p><strong>TLDR</strong>; Styx exists to address the lack of support other frameworks provide, particularly in the
+legacy DSP/embedded scene and when dealing with non-linux/mainstream operating systems.</p><h2 id=feedback-since-the-public-release>Feedback since the public release</h2><p>Styx&rsquo;s open source release was <a href=/posts/styx-emulator-release/>a little over 2 weeks ago</a>.
+Since then there&rsquo;s been a lot of good feedback, comments and questions about the how and what of Styx,
+and a few questions about the why. Since the &ldquo;why&rdquo; questions are always more complicated, I&rsquo;ll answer the how/what first, and then
+try and spend a few minutes to address and reflect on the
+current state of emulation/rehosting to hopefully help articulate the niche Styx fills quite nicely.</p><h2 id=the-good>The Good</h2><p>I&rsquo;ve heard from multiple people taking advantage of Styx&rsquo;s SH4 emulation support, with one already
+implementing the majority of their processor of interest. I&rsquo;ve also gotten some messages of thanks for an
+old PPC implementation that &ldquo;just worked.&rdquo; There have also been a lot of positive receptions in various
+communities welcoming a new kid on the block, looking forward to hearing more. It also sounds like there is
+a growing interest around the MVP of the Hexagon instruction emulation backend, so I hope that can turn
+into a stepping-off point of some community collaboration. And, even though its not supported some people
+tried using Styx on Windows and MacOS. I have since &ldquo;fixed&rdquo; the bugs with builds on MacOS in
+<a href=https://github.com/styx-emulator/styx-emulator/commit/dba0f1dc31a07b0a34e67083970da44b9a3b5a72>dba0f1d</a> and
+<a href=https://github.com/styx-emulator/styx-emulator/commit/a1c1fcff16b7d1e93c187f8834ee993dadb01b7b>a1c1fcf</a>.
+See <a href=https://github.com/styx-emulator/styx-emulator/issues/31>this ticket</a> for the remaining cross-platform issues. In general you should be able to build the
+codebase, but running the <a href=https://github.com/styx-emulator/styx-emulator/tree/main/styx/core/styx-tracebus>tracebus</a> will not function.</p><p>Lots of good energy and movement here! Hope things continue.</p><h2 id=the-easier-questions>The easier questions</h2><h3 id=how-am-i-supposed-to-use-this>How am I supposed to use this?</h3><p>As mentioned <a href=https://docs.styx-emulator.org/installing.html>in the docs</a>,
+the Styx Emulator is currently only being distributed as a library. This means you either need to follow the
+docs linked to add Styx as a dependency of your rust crate (similar to how the examples work), or build one of
+the binding crates and pip install / link against the emitted <code>.a</code> / <code>.so</code> / <code>.dylib</code> / <code>.dll</code>.</p><h3 id=how-do-i-make-custom-components>How do I make custom components?</h3><p>Making an emulator for a processor is no simple task, which gets even more complicated when you
+start to use someone else&rsquo;s framework. There were a few comments about being confused when trying to
+decide on what or how to implement a peripheral for their specific processor. We could turn around
+and say &ldquo;go read the code,&rdquo; but one of the big things we&rsquo;re trying to do is make the learning
+process easy! Especially for these common components, there should be usable templates that you
+can trivially kickstart your implementation with.</p><p>To address this, part of the upcoming user documentation update is focused on adding <code>cargo-generate</code>
+templates that you can use for all the major trait&rsquo;s eg. <code>ProcessorImpl</code>, <code>EventControllerImpl</code>, <code>Peripheral</code>, and <code>Plugin</code>.
+This will hopefully help keep new components from contributors looking like components already in-tree,
+making it easier to update and refactor the code when the time comes.</p><p>See the <a href=https://github.com/styx-emulator/styx-emulator/pull/113>Pull Request</a> and
+<a href=https://github.com/styx-emulator/styx-emulator/pull/113/commits/694b1f5bf324c2b8309652eba1122b6f35385b29>commit</a> for more information!</p><h3 id=what-does-the-architecture-support-look-like>What does the architecture support look like?</h3><p>Architecture support really comes in two layers. There is the &ldquo;glue code&rdquo; in the <code>styx-cpu-type</code> crate, and
+then the actual backend execution support implemented at the <code>styx-cpu-&lt;backend-name>-backend</code> crates. Note that
+while there is a <code>Backend</code> enum, you don&rsquo;t have to use it to still use Styx (see the
+<a href=https://github.com/styx-emulator/styx-emulator/tree/main/examples/external-backend>external-backend</a> example for more information).
+So you could eg. contribute the architecture glue code in the <code>styx-cpu-type</code> crate to teach Styx about your
+architecture of interest without contributing your super secret sauce high performance backend. This would allow you
+and other users to have a smaller + more integrated patchset with upstream Styx. There&rsquo;s no reason Styx
+should be the blocker to using the nice interfaces and libraries - if you find something that doesn&rsquo;t allow
+you to &ldquo;bring your own,&rdquo; file an issue.</p><h3 id=why-is-the-arch-enum-have-so-many-entries-if-you-dont-support-all-those-yet>Why is the <code>Arch</code> enum have so many entries if you don&rsquo;t support all those yet?</h3><p>This is where we start to get into the core ideals of Styx. Styx aims to allow users to override or bring
+their own behavior, even if upstream/mainline Styx hasn&rsquo;t implemented or thought of things yet. Not only
+does this allow for easier tinkering and experimentation by contributors, but it also allows for organizations
+to have an easier time maintaining (and hopefully contributing!) custom or fixed behavior. To put it
+plainly: if a company wants to use Styx and eg. not contribute a backend for an architecture, so be it.
+We shouldn&rsquo;t make it difficult, we should actually encourage it.</p><p>Taking the previous example a little further, if a company wanted to add an architecture support, but not
+contribute a backend (eg. add the <code>Arch</code>, <code>ArchRegister</code>, and <code>ArchVariant</code> definitions for RISCV32 to
+&ldquo;add the glue code&rdquo;, but not add backend support in-tree), that is a welcome contribution. Remember,
+Styx &ldquo;architecture support&rdquo; comes in <a href=#What-does-the-architecture-support-look-like>two layers</a>, the
+glue, and the backend support. This allows down-stream users to maintain less-invasive and stable patchsets.
+Less friction for users == good.</p><p>The architectures is a particular pain point that should be trivially solved. So the goal is to make it easy.</p><h2 id=the-not-so-easy-questions>The not so easy questions</h2><h3 id=why-not-renode>Why not Renode</h3><p>A question we and some users have gotten is &ldquo;why not Renode?&rdquo; Which is a fair question.
+An easy answer is &ldquo;read the introduction post&rdquo;, or &ldquo;how easy is it to add a new
+architecture to Renode&rdquo;? But those answers are a cop-out and not constructive. The better answer
+is that Renode and Styx serve two different use cases and goals. Styx aims to be a framework that
+allows users to trivially tailor or add their desired behavior if the maintainers didn&rsquo;t think of it
+first. The set of core interfaces (which itself should be a research paper or at least its own blog post)
+in Styx allows for customization of the entire emulation stack, including bringing your own execution backend.</p><h4 id=current-rehostingemulation-projects>Current Rehosting/Emulation projects</h4><p>For a bit of context, modern rehosting/emulation tools really only fall into one of a few camps:</p><ul><li>QEMU mainline</li><li>QEMU/TCG fork for a specific target</li><li>QEMU/TCG fork for generic support</li><li>&ldquo;rehost&rdquo; an arm32 firmware on an arm64 machine</li><li>a oneoff target specific emulator</li><li>try and use Ghidra SLEIGH or PCODE</li><li>an expensive commercial solution that might support some of your needs</li></ul><p>All of these approaches have their use cases, benefits, and tradeoffs, but there never really was
+something that let us properly approach the idea of emulating and debugging systems of connected
+devices of diverse architectures. RENODE exists, so does SIMICS, and the ability to color outside
+the lines of the few supported targets was regularly a non-starter for us. &ldquo;It&rsquo;s open source&rdquo; only
+gets you so far if you have to maintain a stale patchset on top of a project moving fast, in a
+different direction. Then its the initial stale-qemu-fork problem all over again.</p><h4 id=the-need-for-something-different>The need for something different</h4><p>I went into some specifics a little more <a href=https://github.com/styx-emulator/styx-emulator/issues/103#issuecomment-3329897234>responding to an issue on the repository</a>,
+but the TLDR is; none of the available options really gave us the tools we needed to support the targets we had
+(something something, there&rsquo;s more than just linux out there).</p><p>Generally boiling down to:</p><ul><li>not user-extensible</li><li>no easily accessible interrupt data tracking</li><li>too focused on supporting $specific operating system</li><li>not faithful to MMIO (eg. writing to the data register without enabling it should not transmit data)</li><li>no Harvard memory support</li><li>no easy way to instrument a specific usermode process under a specific OS kernel</li><li>no easy way to add new architectures.</li></ul><h2 id=conclusion>Conclusion</h2><p>In summary, the perceived need / value of Styx comes from less from the &ldquo;everything is bad&rdquo; and more from
+the &ldquo;1000 small cuts waste a lot of time, energy, and hours&rdquo; for a bunch of tools that didn&rsquo;t fulfill the usecase.
+We needed an emulator that lets users customize, configure, connect, and debug concurrent systems in a programmatic
+matter that comes batteries included for your debugging and vulnerability discovery needs. Styx is attempting
+to fill that gap. By providing an easy mechanism to perform standard emulation tasks in a backend-agnostic
+manner, the Styx Emulator is attempting to provide a middleground to help people rapidly experiment and
+develop new emulation tools to continue to move the emulation scene forwards, instead of encouraging
+yet another stale fork of QEMU.</p></div><div class=tag-list><a href=/tags/styx class=tag>#styx</a>
+<a href=/tags/rehosting class=tag>#rehosting</a>
+<a href=/tags/emulation class=tag>#emulation</a>
+<a href=/tags/comparison class=tag>#comparison</a></div><nav class=post-nav><a href=https://stumbl.ing/posts/styx-emulator-release/ class=prev-post>← Styx Emulator Public Release</a></nav></article></div></main><footer><div class=container><div class=footer-content><div class=footer-links><a href=/index.xml>RSS</a>
+<a href=https://github.com/lockbox>GitHub</a>
+<a href=https://github.com/struct-foo>struct-foo</a>
+<a href=https://infosec.exchange/@lockbox@infosec.exchange>Mastodon</a>
+<a href=https://twitter.com/lockbox4141>Twitter</a></div><div class=footer-copy>© 2025 stumbl.ing | stumbling forward</div></div></div></footer><script src=/js/main.js></script></body></html>
