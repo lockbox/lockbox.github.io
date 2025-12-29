@@ -4,6 +4,10 @@
 <meta name="description" content="{{ if .Description }}{{ .Description }}{{ else }}{{ .Site.Params.description }}{{ end }}">
 <meta name="show-reading-time" content="{{ if .Site.Params.showReadingTime }}true{{ else }}false{{ end }}">
 
+{{ if not hugo.IsServer }}
+{{ template "_internal/google_analytics.html" . }}
+{{ end }}
+
 <link rel="stylesheet" href="{{ "/css/main.css" | relURL }}">
 <link rel="canonical" href="{{ .Permalink }}">
 <link rel="alternate" type="application/rss+xml" href="{{ "index.xml" | relURL }}" title="{{ .Site.Title }}">

@@ -11,52 +11,55 @@ enableGitInfo = false
 pagerSize = 10
 
 [params]
-  description = "Embedded shenanigans: DSP debugging, reverse engineering, and hardware teardowns"
-  logo = "/images/logo.png"
-  favicon = "/favicon.ico"
-  
-  # Social links
-  github_username = "lockbox"
-  github_org = "struct-foo"
-  styx_repo = "styx-emulator"
-  mastodon = "@lockbox@infosec.exchange"
-  twitter = "lockbox4141"
-  
-  # Features
-  showReadingTime = true
-  defaultTheme = "dark"
+description = "Embedded shenanigans: DSPs, Hardware RE, and other bits and bobs"
+logo = "/images/logo.png"
+favicon = "/favicon.ico"
 
-  # Adobe PDF Embed API
-  # Get your free client ID from: https://www.adobe.com/go/dcsdks_credentials
-  [params.adobe]
-    pdfEmbedClientId = ""
+# Social links
+github_username = "lockbox"
+github_org = "struct-foo"
+styx_repo = "styx-emulator"
+mastodon = "@lockbox@infosec.exchange"
+twitter = "lockbox4141"
+
+# Features
+showReadingTime = true
+defaultTheme = "dark"
+
+# Adobe PDF Embed API
+# Get your free client ID from: https://www.adobe.com/go/dcsdks_credentials
+[params.adobe]
+pdfEmbedClientId = ""
 
 [menu]
-  [[menu.main]]
-    name = "About"
-    url = "/about/"
-    weight = 1
-  
-  [[menu.main]]
-    name = "Projects"  
-    url = "/projects/"
-    weight = 2
-    
-  [[menu.main]]
-    name = "Archive"
-    url = "/posts/"
-    weight = 3
-    
-  [[menu.main]]
-    name = "GitHub"
-    url = "https://github.com/lockbox"
-    weight = 4
+[[menu.main]]
+name = "About"
+url = "/about/"
+weight = 1
+
+[[menu.main]]
+name = "Projects"
+url = "/projects/"
+weight = 2
+
+[[menu.main]]
+name = "Archive"
+url = "/posts/"
+weight = 3
+
+[[menu.main]]
+name = "GitHub"
+url = "https://github.com/lockbox"
+weight = 4
 
 [taxonomies]
-  tag = "tags"
-  category = "categories"
+tag = "tags"
+category = "categories"
 
 [outputs]
-  home = ["HTML", "RSS"]
-  section = ["HTML", "RSS"]
+home = ["HTML", "RSS"]
+section = ["HTML", "RSS"]
 
+[services]
+[services.googleAnalytics]
+ID = "G-XQYNTDGW8D"
