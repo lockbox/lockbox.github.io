@@ -1,4 +1,4 @@
-<!doctype html><html lang=en-us data-theme=dark><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Styx Emulator Public Release | stumbl.ing</title><meta name=description content="Embedded shenanigans: DSP debugging, reverse engineering, and hardware teardowns"><meta name=show-reading-time content="true"><link rel=stylesheet href=/css/main.css><link rel=canonical href=https://stumbl.ing/posts/styx-emulator-release/><link rel=alternate type=application/rss+xml href=/index.xml title=stumbl.ing><link rel=icon type=image/x-icon href=/favicon.ico><link rel=apple-touch-icon sizes=57x57 href=/apple-icon-57x57.png><link rel=apple-touch-icon sizes=60x60 href=/apple-icon-60x60.png><link rel=apple-touch-icon sizes=72x72 href=/apple-icon-72x72.png><link rel=apple-touch-icon sizes=76x76 href=/apple-icon-76x76.png><link rel=apple-touch-icon sizes=114x114 href=/apple-icon-114x114.png><link rel=apple-touch-icon sizes=120x120 href=/apple-icon-120x120.png><link rel=apple-touch-icon sizes=144x144 href=/apple-icon-144x144.png><link rel=apple-touch-icon sizes=152x152 href=/apple-icon-152x152.png><link rel=apple-touch-icon sizes=180x180 href=/apple-icon-180x180.png><link rel=icon type=image/png sizes=192x192 href=/android-icon-192x192.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=96x96 href=/favicon-96x96.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><meta name=msapplication-TileColor content="#ffffff"><meta name=msapplication-TileImage content="/ms-icon-144x144.png"><meta name=theme-color content="#ffffff"><meta name=generator content="Hugo 0.152.2"></head><body><header><div class=container><nav><a href=https://stumbl.ing/ class=site-title>stumbl.ing</a><div class=nav-links><a href=/about/>about</a>
+<!doctype html><html lang=en-us data-theme=dark><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Styx Emulator Public Release | stumbl.ing</title><meta name=description content="Embedded shenanigans: DSPs, Hardware RE, and other bits and bobs"><meta name=show-reading-time content="true"><script async src="https://www.googletagmanager.com/gtag/js?id=G-XQYNTDGW8D"></script><script>var doNotTrack=!1,dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes";if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-XQYNTDGW8D")}</script><link rel=stylesheet href=/css/main.css><link rel=canonical href=https://stumbl.ing/posts/styx-emulator-release/><link rel=alternate type=application/rss+xml href=/index.xml title=stumbl.ing><link rel=icon type=image/x-icon href=/favicon.ico><link rel=apple-touch-icon sizes=57x57 href=/apple-icon-57x57.png><link rel=apple-touch-icon sizes=60x60 href=/apple-icon-60x60.png><link rel=apple-touch-icon sizes=72x72 href=/apple-icon-72x72.png><link rel=apple-touch-icon sizes=76x76 href=/apple-icon-76x76.png><link rel=apple-touch-icon sizes=114x114 href=/apple-icon-114x114.png><link rel=apple-touch-icon sizes=120x120 href=/apple-icon-120x120.png><link rel=apple-touch-icon sizes=144x144 href=/apple-icon-144x144.png><link rel=apple-touch-icon sizes=152x152 href=/apple-icon-152x152.png><link rel=apple-touch-icon sizes=180x180 href=/apple-icon-180x180.png><link rel=icon type=image/png sizes=192x192 href=/android-icon-192x192.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=96x96 href=/favicon-96x96.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><meta name=msapplication-TileColor content="#ffffff"><meta name=msapplication-TileImage content="/ms-icon-144x144.png"><meta name=theme-color content="#ffffff"><meta name=generator content="Hugo 0.153.4"></head><body><header><div class=container><nav><a href=https://stumbl.ing/ class=site-title>stumbl.ing</a><div class=nav-links><a href=/about/>about</a>
 <a href=/projects/>projects</a>
 <a href=/posts/>archive</a>
 <a href=https://github.com/lockbox>github</a>
@@ -68,7 +68,7 @@ crate in your project.</p><h3 id=simple-quickstart>Simple quickstart</h3><p>Rust
 </span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>THUMB_CODE</span>: <span style=color:#66d9ef>&amp;</span><span style=color:#66d9ef>str</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;MOV R0, #5; MOV R1, #3; MUL R2, R0, R1; SVC #0&#34;</span>;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#e6db74>/// Uses Keystone to assemble some Arm instructions and return the resulting bytes
-</span></span></span><span style=display:flex><span><span style=color:#e6db74></span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>assemble_code</span>() -&gt; Vec<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>u8</span><span style=color:#f92672>&gt;</span> {
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>assemble_code</span>() -&gt; Vec<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>u8</span><span style=color:#f92672>&gt;</span> {
 </span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> ks <span style=color:#f92672>=</span> Keystone::new(keystone_engine::Arch::<span style=color:#66d9ef>ARM</span>, keystone_engine::Mode::<span style=color:#66d9ef>THUMB</span>)
 </span></span><span style=display:flex><span>        .expect(<span style=color:#e6db74>&#34;Could not initialize Keystone engine&#34;</span>);
 </span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> asm <span style=color:#f92672>=</span> ks
@@ -80,25 +80,25 @@ crate in your project.</p><h3 id=simple-quickstart>Simple quickstart</h3><p>Rust
 </span></span><span style=display:flex><span>}
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#e6db74>/// Callback for tracing instructions
-</span></span></span><span style=display:flex><span><span style=color:#e6db74></span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>hook_code</span>(cpu: <span style=color:#a6e22e>ProcessorCoreBackend</span>) {
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>hook_code</span>(cpu: <span style=color:#a6e22e>ProcessorCoreBackend</span>) {
 </span></span><span style=display:flex><span>    <span style=color:#a6e22e>println!</span>(<span style=color:#e6db74>&#34;&gt;&gt;&gt; Tracing instruction at 0x</span><span style=color:#e6db74>{:x}</span><span style=color:#e6db74>&#34;</span>, cpu.pc().unwrap());
 </span></span><span style=display:flex><span>}
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#e6db74>/// Callback for tracing basic blocks
-</span></span></span><span style=display:flex><span><span style=color:#e6db74></span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>hook_block</span>(_cpu: <span style=color:#a6e22e>ProcessorCoreBackend</span>, address: <span style=color:#66d9ef>u64</span>, size: <span style=color:#66d9ef>u32</span>) {
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>hook_block</span>(_cpu: <span style=color:#a6e22e>ProcessorCoreBackend</span>, address: <span style=color:#66d9ef>u64</span>, size: <span style=color:#66d9ef>u32</span>) {
 </span></span><span style=display:flex><span>    <span style=color:#a6e22e>println!</span>(<span style=color:#e6db74>&#34;&gt;&gt;&gt; Tracing basic block at 0x</span><span style=color:#e6db74>{:x}</span><span style=color:#e6db74>, block size = </span><span style=color:#e6db74>{}</span><span style=color:#e6db74>&#34;</span>, address, size);
 </span></span><span style=display:flex><span>}
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#e6db74>/// Callback for tracing interrupts
-</span></span></span><span style=display:flex><span><span style=color:#e6db74></span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>hook_interrupts</span>(cpu: <span style=color:#a6e22e>ProcessorCoreBackend</span>, intno: <span style=color:#66d9ef>i32</span>) {
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>hook_interrupts</span>(cpu: <span style=color:#a6e22e>ProcessorCoreBackend</span>, intno: <span style=color:#66d9ef>i32</span>) {
 </span></span><span style=display:flex><span>    <span style=color:#a6e22e>println!</span>(<span style=color:#e6db74>&#34;&gt;&gt;&gt; Tracing interrupt at 0x</span><span style=color:#e6db74>{:x}</span><span style=color:#e6db74>, interrupt number = </span><span style=color:#e6db74>{}</span><span style=color:#e6db74>&#34;</span>, cpu.pc().unwrap(), intno);
 </span></span><span style=display:flex><span>    <span style=color:#75715e>// quit emulation
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    cpu.stop().unwrap();
+</span></span></span><span style=display:flex><span>    cpu.stop().unwrap();
 </span></span><span style=display:flex><span>}
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>main</span>() -&gt; Result<span style=color:#f92672>&lt;</span>(), Box<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>dyn</span> std::error::Error<span style=color:#f92672>&gt;&gt;</span> {
 </span></span><span style=display:flex><span>    <span style=color:#75715e>// create a RawProcessor (i.e. minimal processor) for 32 bit Arm LE, using the PCode backend
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    <span style=color:#66d9ef>let</span> proc <span style=color:#f92672>=</span> ProcessorBuilder::default()
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> proc <span style=color:#f92672>=</span> ProcessorBuilder::default()
 </span></span><span style=display:flex><span>        .with_backend(Backend::Pcode)
 </span></span><span style=display:flex><span>        .with_endian(ArchEndian::LittleEndian)
 </span></span><span style=display:flex><span>        .with_variant(ArmVariants::ArmCortexM4)
@@ -108,15 +108,15 @@ crate in your project.</p><h3 id=simple-quickstart>Simple quickstart</h3><p>Rust
 </span></span><span style=display:flex><span>        .build::<span style=color:#f92672>&lt;</span>RawProcessor<span style=color:#f92672>&gt;</span>()<span style=color:#f92672>?</span>;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#75715e>// add hooks for instructions, basic blocks, and interrupts
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    proc.add_hook(StyxHook::Code { start: <span style=color:#66d9ef>u64</span>::<span style=color:#66d9ef>MIN</span>, end: <span style=color:#66d9ef>u64</span>::<span style=color:#66d9ef>MAX</span>, callback: Box::new(hook_code) })<span style=color:#f92672>?</span>;
+</span></span></span><span style=display:flex><span>    proc.add_hook(StyxHook::Code { start: <span style=color:#66d9ef>u64</span>::<span style=color:#66d9ef>MIN</span>, end: <span style=color:#66d9ef>u64</span>::<span style=color:#66d9ef>MAX</span>, callback: Box::new(hook_code) })<span style=color:#f92672>?</span>;
 </span></span><span style=display:flex><span>    proc.add_hook(StyxHook::Block { callback: Box::new(hook_block) })<span style=color:#f92672>?</span>;
 </span></span><span style=display:flex><span>    proc.add_hook(StyxHook::Interrupt { callback: Box::new(hook_interrupts) })<span style=color:#f92672>?</span>;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#75715e>// start emulation
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    proc.start()<span style=color:#f92672>?</span>;
+</span></span></span><span style=display:flex><span>    proc.start()<span style=color:#f92672>?</span>;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#75715e>// check that R2 holds the value 15 to see if emulation was successful
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    <span style=color:#a6e22e>assert_eq!</span>(proc.read_register::<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>u32</span><span style=color:#f92672>&gt;</span>(ArmRegister::R2).unwrap(), <span style=color:#ae81ff>15_</span><span style=color:#66d9ef>u32</span>);
+</span></span></span><span style=display:flex><span>    <span style=color:#a6e22e>assert_eq!</span>(proc.read_register::<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>u32</span><span style=color:#f92672>&gt;</span>(ArmRegister::R2).unwrap(), <span style=color:#ae81ff>15_</span><span style=color:#66d9ef>u32</span>);
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    Ok(())
 </span></span><span style=display:flex><span>}
@@ -126,7 +126,7 @@ crate in your project.</p><h3 id=simple-quickstart>Simple quickstart</h3><p>Rust
 </span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> tracing::info;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#e6db74>/// path to yaml description, see [`ParameterizedLoader`] for more
-</span></span></span><span style=display:flex><span><span style=color:#e6db74></span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>LOAD_YAML</span>: <span style=color:#66d9ef>&amp;</span><span style=color:#66d9ef>str</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;load.yaml&#34;</span>;
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>LOAD_YAML</span>: <span style=color:#66d9ef>&amp;</span><span style=color:#66d9ef>str</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;load.yaml&#34;</span>;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>main</span>() -&gt; Result<span style=color:#f92672>&lt;</span>(), Box<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>dyn</span> std::error::Error<span style=color:#f92672>&gt;&gt;</span> {
 </span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> proc <span style=color:#f92672>=</span> ProcessorBuilder::default()
@@ -167,15 +167,15 @@ crate in your project.</p><h3 id=simple-quickstart>Simple quickstart</h3><p>Rust
 </span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&#34;styx_emulator.h&#34;</span><span style=color:#75715e>
 </span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;stdint.h&gt;</span><span style=color:#75715e>
 </span></span></span><span style=display:flex><span><span style=color:#75715e>#include</span> <span style=color:#75715e>&lt;string.h&gt;</span><span style=color:#75715e>
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>
+</span></span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#75715e>#define TARGET_PGM                                                   \
 </span></span></span><span style=display:flex><span><span style=color:#75715e>  &#34;target.bin&#34;
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>
+</span></span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#66d9ef>void</span> <span style=color:#a6e22e>log_signal</span>(StyxProcessorCore cpu)
 </span></span><span style=display:flex><span>{
 </span></span><span style=display:flex><span>  (<span style=color:#66d9ef>void</span>)cpu;
 </span></span><span style=display:flex><span>  <span style=color:#75715e>// look at this: it prints
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#66d9ef>uint64_t</span> pc;
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>uint64_t</span> pc;
 </span></span><span style=display:flex><span>  <span style=color:#a6e22e>StyxProcessorCore_pc</span>(cpu, <span style=color:#f92672>&amp;</span>pc);
 </span></span><span style=display:flex><span>  <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;Hit loop @ pc 0x%lX</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>, pc);
 </span></span><span style=display:flex><span>}
@@ -198,15 +198,15 @@ crate in your project.</p><h3 id=simple-quickstart>Simple quickstart</h3><p>Rust
 </span></span><span style=display:flex><span>  StyxEmulationReport report <span style=color:#f92672>=</span> NULL;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>  <span style=color:#75715e>// enable styx logging
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#75715e>// Styx_init_logging(5, &#34;trace&#34;);
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>
+</span></span></span><span style=display:flex><span>  <span style=color:#75715e>// Styx_init_logging(5, &#34;trace&#34;);
+</span></span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>  <span style=color:#75715e>// create the builder
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_new</span>(<span style=color:#f92672>&amp;</span>builder)))
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_new</span>(<span style=color:#f92672>&amp;</span>builder)))
 </span></span><span style=display:flex><span>  {
 </span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>  <span style=color:#75715e>// set the executor
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxExecutor_Executor_default</span>(<span style=color:#f92672>&amp;</span>executor)))
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxExecutor_Executor_default</span>(<span style=color:#f92672>&amp;</span>executor)))
 </span></span><span style=display:flex><span>  {
 </span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
 </span></span><span style=display:flex><span>  }
@@ -222,7 +222,7 @@ crate in your project.</p><h3 id=simple-quickstart>Simple quickstart</h3><p>Rust
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>  <span style=color:#75715e>// set the loader
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxLoader_RawLoader_new</span>(<span style=color:#f92672>&amp;</span>loader)))
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxLoader_RawLoader_new</span>(<span style=color:#f92672>&amp;</span>loader)))
 </span></span><span style=display:flex><span>  {
 </span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
 </span></span><span style=display:flex><span>  }
@@ -245,20 +245,20 @@ crate in your project.</p><h3 id=simple-quickstart>Simple quickstart</h3><p>Rust
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>  <span style=color:#75715e>// set the target program
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_set_target_program</span>(
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_set_target_program</span>(
 </span></span><span style=display:flex><span>           builder, TARGET_PGM, (<span style=color:#66d9ef>uint32_t</span>)<span style=color:#a6e22e>strlen</span>(TARGET_PGM))))
 </span></span><span style=display:flex><span>  {
 </span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>  <span style=color:#75715e>// have the cpu use 16001 as the Ipc port
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_set_ipc_port</span>(builder, <span style=color:#ae81ff>16001</span>)))
+</span></span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessorBuilder_set_ipc_port</span>(builder, <span style=color:#ae81ff>16001</span>)))
 </span></span><span style=display:flex><span>  {
 </span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>  <span style=color:#75715e>// add a code hook just to test that hooks indeed work
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  StyxHook_Code log_signal_hook <span style=color:#f92672>=</span> {
+</span></span></span><span style=display:flex><span>  StyxHook_Code log_signal_hook <span style=color:#f92672>=</span> {
 </span></span><span style=display:flex><span>      .start <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x590e</span>,
 </span></span><span style=display:flex><span>      .end <span style=color:#f92672>=</span> <span style=color:#ae81ff>0x590e</span>,
 </span></span><span style=display:flex><span>      .callback <span style=color:#f92672>=</span> log_signal,
@@ -269,7 +269,7 @@ crate in your project.</p><h3 id=simple-quickstart>Simple quickstart</h3><p>Rust
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>  <span style=color:#75715e>// build the processor
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;[*] building processor</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;[*] building processor</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
 </span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span>
 </span></span><span style=display:flex><span>           <span style=color:#a6e22e>StyxProcessorBuilder_build</span>(builder, STYX_TARGET_STM32F107, <span style=color:#f92672>&amp;</span>proc)))
 </span></span><span style=display:flex><span>  {
@@ -277,11 +277,11 @@ crate in your project.</p><h3 id=simple-quickstart>Simple quickstart</h3><p>Rust
 </span></span><span style=display:flex><span>  }
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>  <span style=color:#75715e>/// dispose the builder
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#a6e22e>StyxProcessorBuilder_free</span>(<span style=color:#f92672>&amp;</span>builder);
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>StyxProcessorBuilder_free</span>(<span style=color:#f92672>&amp;</span>builder);
 </span></span><span style=display:flex><span>  builder <span style=color:#f92672>=</span> NULL;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>  <span style=color:#75715e>// this runs the cpu (blocking)
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>  <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;[*] running processor</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
+</span></span></span><span style=display:flex><span>  <span style=color:#a6e22e>printf</span>(<span style=color:#e6db74>&#34;[*] running processor</span><span style=color:#ae81ff>\n</span><span style=color:#e6db74>&#34;</span>);
 </span></span><span style=display:flex><span>  <span style=color:#66d9ef>if</span> ((error <span style=color:#f92672>=</span> <span style=color:#a6e22e>StyxProcessor_start_blocking_constraints</span>(proc, <span style=color:#ae81ff>1000</span>, <span style=color:#ae81ff>1000</span>, <span style=color:#f92672>&amp;</span>report)))
 </span></span><span style=display:flex><span>  {
 </span></span><span style=display:flex><span>    <span style=color:#66d9ef>goto</span> defer;
@@ -318,14 +318,14 @@ crate in your project.</p><h3 id=simple-quickstart>Simple quickstart</h3><p>Rust
 </span></span><span style=display:flex><span><span style=color:#66d9ef>use</span> tracing::info;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#e6db74>/// path to yaml description, see [`ParameterizedLoader`] for more
-</span></span></span><span style=display:flex><span><span style=color:#e6db74></span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>LOAD_YAML</span>: <span style=color:#66d9ef>&amp;</span><span style=color:#66d9ef>str</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;load.yaml&#34;</span>;
+</span></span></span><span style=display:flex><span><span style=color:#66d9ef>const</span> <span style=color:#66d9ef>LOAD_YAML</span>: <span style=color:#66d9ef>&amp;</span><span style=color:#66d9ef>str</span> <span style=color:#f92672>=</span> <span style=color:#e6db74>&#34;load.yaml&#34;</span>;
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span><span style=color:#66d9ef>fn</span> <span style=color:#a6e22e>main</span>() -&gt; Result<span style=color:#f92672>&lt;</span>(), Box<span style=color:#f92672>&lt;</span><span style=color:#66d9ef>dyn</span> std::error::Error<span style=color:#f92672>&gt;&gt;</span> {
 </span></span><span style=display:flex><span>    <span style=color:#75715e>// build the arguments to the gdb server plugin
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    <span style=color:#66d9ef>let</span> gdb_params <span style=color:#f92672>=</span> GdbPluginParams::tcp(<span style=color:#e6db74>&#34;0.0.0.0&#34;</span>, <span style=color:#ae81ff>9999</span>, <span style=color:#66d9ef>true</span>);
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> gdb_params <span style=color:#f92672>=</span> GdbPluginParams::tcp(<span style=color:#e6db74>&#34;0.0.0.0&#34;</span>, <span style=color:#ae81ff>9999</span>, <span style=color:#66d9ef>true</span>);
 </span></span><span style=display:flex><span>
 </span></span><span style=display:flex><span>    <span style=color:#75715e>// build the processor
-</span></span></span><span style=display:flex><span><span style=color:#75715e></span>    <span style=color:#66d9ef>let</span> proc <span style=color:#f92672>=</span> ProcessorBuilder::default()
+</span></span></span><span style=display:flex><span>    <span style=color:#66d9ef>let</span> proc <span style=color:#f92672>=</span> ProcessorBuilder::default()
 </span></span><span style=display:flex><span>        .with_backend(Backend::Pcode)
 </span></span><span style=display:flex><span>        .with_loader(ParameterizedLoader::default())
 </span></span><span style=display:flex><span>        .with_executor(GdbExecutor::<span style=color:#f92672>&lt;</span>ArmMProfileDescription<span style=color:#f92672>&gt;</span>::new(gdb_params)<span style=color:#f92672>?</span>)
